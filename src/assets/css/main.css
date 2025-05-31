@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-900 text-white;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-game-primary hover:bg-game-primary/90 text-white font-bold py-2 px-4 rounded transition-colors;
+  }
+  
+  .btn-secondary {
+    @apply bg-game-secondary hover:bg-game-secondary/90 text-white font-bold py-2 px-4 rounded transition-colors;
+  }
+  
+  .game-card {
+    @apply bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow;
+  }
+  
+  .game-title {
+    @apply text-2xl font-game text-game-accent mb-2;
+  }
+}

@@ -1,0 +1,59 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Tetris Game Icon -->
+  <rect width="200" height="200" rx="20" fill="#1a1a2e"/>
+  
+  <!-- Game board -->
+  <rect x="30" y="20" width="140" height="160" rx="8" fill="#16213e" stroke="#0f3460" stroke-width="2"/>
+  
+  <!-- Grid lines -->
+  <defs>
+    <pattern id="tetrisGrid" width="14" height="14" patternUnits="userSpaceOnUse">
+      <path d="M 14 0 L 0 0 0 14" fill="none" stroke="#0f3460" stroke-width="0.5" opacity="0.5"/>
+    </pattern>
+  </defs>
+  <rect x="32" y="22" width="136" height="156" fill="url(#tetrisGrid)"/>
+  
+  <!-- Falling T-piece -->
+  <rect x="88" y="30" width="12" height="12" fill="#ff6b6b" stroke="#ffffff" stroke-width="1"/>
+  <rect x="76" y="42" width="12" height="12" fill="#ff6b6b" stroke="#ffffff" stroke-width="1"/>
+  <rect x="88" y="42" width="12" height="12" fill="#ff6b6b" stroke="#ffffff" stroke-width="1"/>
+  <rect x="100" y="42" width="12" height="12" fill="#ff6b6b" stroke="#ffffff" stroke-width="1"/>
+  
+  <!-- Completed rows at bottom -->
+  <!-- Row 1 -->
+  <rect x="32" y="154" width="12" height="12" fill="#4ecdc4" stroke="#ffffff" stroke-width="1"/>
+  <rect x="44" y="154" width="12" height="12" fill="#45b7aa" stroke="#ffffff" stroke-width="1"/>
+  <rect x="56" y="154" width="12" height="12" fill="#4ecdc4" stroke="#ffffff" stroke-width="1"/>
+  <rect x="68" y="154" width="12" height="12" fill="#45b7aa" stroke="#ffffff" stroke-width="1"/>
+  <rect x="80" y="154" width="12" height="12" fill="#4ecdc4" stroke="#ffffff" stroke-width="1"/>
+  <rect x="92" y="154" width="12" height="12" fill="#45b7aa" stroke="#ffffff" stroke-width="1"/>
+  <rect x="104" y="154" width="12" height="12" fill="#4ecdc4" stroke="#ffffff" stroke-width="1"/>
+  <rect x="116" y="154" width="12" height="12" fill="#45b7aa" stroke="#ffffff" stroke-width="1"/>
+  <rect x="128" y="154" width="12" height="12" fill="#4ecdc4" stroke="#ffffff" stroke-width="1"/>
+  <rect x="140" y="154" width="12" height="12" fill="#45b7aa" stroke="#ffffff" stroke-width="1"/>
+  <rect x="152" y="154" width="12" height="12" fill="#4ecdc4" stroke="#ffffff" stroke-width="1"/>
+  
+  <!-- Row 2 -->
+  <rect x="32" y="142" width="12" height="12" fill="#ffe66d" stroke="#ffffff" stroke-width="1"/>
+  <rect x="44" y="142" width="12" height="12" fill="#ffcc02" stroke="#ffffff" stroke-width="1"/>
+  <rect x="56" y="142" width="12" height="12" fill="#ffe66d" stroke="#ffffff" stroke-width="1"/>
+  <rect x="68" y="142" width="12" height="12" fill="#ffcc02" stroke="#ffffff" stroke-width="1"/>
+  <rect x="80" y="142" width="12" height="12" fill="#ffe66d" stroke="#ffffff" stroke-width="1"/>
+  <rect x="92" y="142" width="12" height="12" fill="#ffcc02" stroke="#ffffff" stroke-width="1"/>
+  <rect x="104" y="142" width="12" height="12" fill="#ffe66d" stroke="#ffffff" stroke-width="1"/>
+  <rect x="116" y="142" width="12" height="12" fill="#ffcc02" stroke="#ffffff" stroke-width="1"/>
+  <rect x="128" y="142" width="12" height="12" fill="#ffe66d" stroke="#ffffff" stroke-width="1"/>
+  <rect x="140" y="142" width="12" height="12" fill="#ffcc02" stroke="#ffffff" stroke-width="1"/>
+  <rect x="152" y="142" width="12" height="12" fill="#ffe66d" stroke="#ffffff" stroke-width="1"/>
+  
+  <!-- Some scattered blocks -->
+  <rect x="32" y="130" width="12" height="12" fill="#a8e6cf" stroke="#ffffff" stroke-width="1"/>
+  <rect x="44" y="130" width="12" height="12" fill="#a8e6cf" stroke="#ffffff" stroke-width="1"/>
+  <rect x="56" y="130" width="12" height="12" fill="#a8e6cf" stroke="#ffffff" stroke-width="1"/>
+  
+  <rect x="128" y="130" width="12" height="12" fill="#ff8b94" stroke="#ffffff" stroke-width="1"/>
+  <rect x="140" y="130" width="12" height="12" fill="#ff8b94" stroke="#ffffff" stroke-width="1"/>
+  
+  <!-- Title -->
+  <text x="100" y="15" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#ffffff">TETRIS</text>
+</svg>
