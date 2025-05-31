@@ -1,0 +1,50 @@
+[
+    {
+        "id": 1,
+        "name": "益智游戏",
+        "icon": "🧩",
+        "tags": ["puzzle", "brain", "math", "sudoku", "crossword", "trivia", "quiz", "memory"]
+    },
+    {
+        "id": 2,
+        "name": "动作游戏",
+        "icon": "⚔️",
+        "tags": ["action", "shooting", "fighting", "platformer", "survival", "adventure", "combat", "weapon"]
+    },
+    {
+        "id": 3,
+        "name": "休闲游戏",
+        "icon": "🎮",
+        "tags": ["casual", "relaxing", "simple", "card", "solitaire", "click", "idle", "dress-up", "cooking", "music"]
+    },
+    {
+        "id": 4,
+        "name": "竞速游戏",
+        "icon": "🏎️",
+        "tags": ["racing", "driving", "car", "motorcycle", "bike", "flight", "boat", "speed"]
+    },
+    {
+        "id": 5,
+        "name": "体育游戏",
+        "icon": "⚽",
+        "tags": ["sports", "football", "basketball", "tennis", "golf", "pool", "soccer", "baseball"]
+    },
+    {
+        "id": 6,
+        "name": "模拟游戏",
+        "icon": "🏗️",
+        "tags": ["simulation", "management", "building", "farm", "city", "business", "tycoon", "life"]
+    },
+    {
+        "id": 7,
+        "name": "策略游戏",
+        "icon": "🎯",
+        "tags": ["strategy", "tower-defense", "turn-based", "rts", "war", "chess", "tactics", "planning"]
+    },
+    {
+        "id": 8,
+        "name": "角色扮演",
+        "icon": "🗡️",
+        "tags": ["rpg", "mmorpg", "role-playing", "character", "story", "fantasy", "adventure", "quest"]
+    }
+]

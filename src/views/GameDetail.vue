@@ -122,18 +122,20 @@
           :key="game.id" 
           class="game-card group"
         >
-          <img 
-            :src="game.image" 
-            :alt="game.title"
-            class="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
-          >
+          <a :href="`/game/${game.id}`" target="_blank">
+            <img 
+              :src="game.image" 
+              :alt="game.title"
+              class="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
+            >
+          </a>
           <div class="p-4">
             <h3 class="game-title text-lg">{{ game.title }}</h3>
             <div class="flex items-center justify-between mt-2">
               <span class="text-sm text-gray-400">{{ game.category }}</span>
-              <router-link :to="`/game/${game.id}`" class="btn-primary text-sm">
+              <a :href="`/game/${game.id}`" target="_blank" class="btn-primary text-sm">
                 开始游戏
-              </router-link>
+              </a>
             </div>
           </div>
         </div>
@@ -143,159 +145,129 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
+const router = useRouter()
 const gameIframe = ref(null)
+const allGames = ref([])
+const game = ref(null)
 
-// 游戏数据
-const games = {
-  '1': {
-    id: '1',
-    title: '2048',
-    category: '益智游戏',
-    rating: 4.5,
-    plays: 12000,
-    image: '/images/game1.svg',
-    gameUrl: '/games/2048/index.html',
-    description: '2048是一款数字益智游戏，通过合并相同的数字方块来获得更高分数。每次移动时，所有方块会向同一方向滑动，相同数字的方块相撞时会合并。游戏目标是获得2048数字方块。',
-    controls: {
-      '↑': '向上滑动',
-      '↓': '向下滑动',
-      '←': '向左滑动',
-      '→': '向右滑动'
+// 跳转到游戏详情页
+const goToGame = (gameId) => {
+  router.push(`/game/${gameId}`)
+}
+
+// 加载所有游戏数据
+const loadAllGames = async () => {
+  try {
+    const response = await fetch('/all-game.json')
+    const data = await response.json()
+    // 为每个游戏添加额外的显示属性
+    allGames.value = await Promise.all(data.map(async (gameData, index) => ({
+      ...gameData,
+      id: index + 1,
+      category: await getCategoryFromTags(gameData.tags),
+      rating: (4.0 + Math.random() * 1.0).toFixed(1),
+      plays: Math.floor(Math.random() * 50000) + 10000,
+      gameUrl: gameData.embed, // 使用embed字段作为游戏URL
+      controls: getDefaultControls(gameData.tags) // 根据标签生成默认控制说明
+    })))
+    
+    // 数据加载完成后更新当前游戏
+    updateCurrentGame()
+  } catch (error) {
+    console.error('加载游戏数据失败:', error)
+  }
+}
+
+// 加载游戏分类配置
+const loadGameTypes = async () => {
+  try {
+    const response = await fetch('/type-game.json')
+    const gameTypes = await response.json()
+    return gameTypes
+  } catch (error) {
+    console.error('Failed to load game types:', error)
+    // 返回空数组，让调用方处理
+    return []
+  }
+}
+
+// 根据标签推断游戏类别
+const getCategoryFromTags = async (tags) => {
+  if (!tags) return '休闲游戏'
+  
+  // 获取游戏分类配置
+  const gameTypes = await loadGameTypes()
+  
+  // 将游戏标签按逗号分割并清理空格
+  const gameTags = tags.split(',').map(tag => tag.trim().toLowerCase())
+  
+  // 遍历每个分类，检查是否有匹配的标签
+  for (const category of gameTypes) {
+    const categoryTags = category.tags.map(tag => tag.toLowerCase())
+    
+    // 检查游戏标签中是否包含该分类的任何标签
+    const hasMatch = gameTags.some(gameTag => categoryTags.includes(gameTag))
+    
+    if (hasMatch) {
+      return category.name
     }
-  },
-  '2': {
-    id: '2',
-    title: '贪吃蛇',
-    category: '休闲游戏',
-    rating: 4.3,
-    plays: 8000,
-    image: '/images/game2.svg',
-    gameUrl: '/games/snake/index.html',
-    description: '经典的贪吃蛇游戏，控制蛇吃掉食物来增长身体。每吃掉一个食物，蛇的长度就会增加，同时得分增加。注意不要撞到墙壁或自己的身体！',
-    controls: {
-      '↑': '向上移动',
-      '↓': '向下移动',
-      '←': '向左移动',
-      '→': '向右移动'
-    }
-  },
-  '3': {
-    id: '3',
-    title: '俄罗斯方块',
-    category: '益智游戏',
-    rating: 4.7,
-    plays: 15000,
-    image: '/images/game3.svg',
-    gameUrl: '/games/tetris/index.html',
-    description: '经典的俄罗斯方块游戏，不同形状的方块从屏幕上方落下，玩家需要控制方块旋转和移动位置，使其填满一整行来消除方块获得分数。当方块堆积到屏幕顶部时游戏结束。',
-    controls: {
-      '↑': '旋转方块',
-      '↓': '加速下落',
-      '←': '向左移动',
-      '→': '向右移动'
-    }
-  },
-  '4': {
-    id: '4',
-    title: 'Monster Survivors',
-    category: '动作游戏',
-    rating: 4.8,
-    plays: 25000,
-    image: '/images/monster-survivors.svg',
-    gameUrl: 'https://cloud.onlinegames.io/games/2025/unity/monster-survivors/index-og.html',
-    description: 'Monster Survivors是一款Unity制作的生存类动作游戏。玩家需要在无尽的怪物潮中生存尽可能长的时间，收集武器和升级来增强自己的战斗能力。游戏具有丰富的武器系统和升级机制。',
-    controls: {
-      '鼠标': '移动和瞄准',
-      '点击': '攻击',
-      '空格': '特殊技能'
-    }
-  },
-  '5': {
-    id: '5',
-    title: 'Highway Traffic',
-    category: '驾驶游戏',
-    rating: 4.6,
-    plays: 45000,
-    image: '/images/racing-car.svg',
-    gameUrl: 'https://www.onlinegames.io/games/2022/unity/highway-traffic/index.html',
-    description: 'Highway Traffic是一款刺激的驾驶游戏，玩家需要在繁忙的高速公路上驾驶，避免与其他车辆碰撞。游戏具有逼真的3D图形和流畅的驾驶体验。',
-    controls: {
+  }
+  
+  // 如果没有匹配到任何分类，默认返回休闲游戏
+  return '休闲游戏'
+}
+
+// 根据标签生成默认控制说明
+const getDefaultControls = (tags) => {
+  if (!tags) return { '鼠标': '点击操作', '键盘': '方向键控制' }
+  
+  const tagList = tags.toLowerCase()
+  if (tagList.includes('racing') || tagList.includes('car')) {
+    return {
       'WASD': '控制车辆',
       '方向键': '转向',
       '空格': '刹车'
     }
-  },
-  '6': {
-    id: '6',
-    title: 'GTA Simulator',
-    category: '动作游戏',
-    rating: 4.7,
-    plays: 38000,
-    image: '/images/racing-car.svg',
-    gameUrl: 'https://www.onlinegames.io/games/2023/unity/gta-simulator/index.html',
-    description: 'GTA Simulator是一款开放世界动作游戏，玩家可以在虚拟城市中自由探索，完成各种任务和挑战。游戏提供了丰富的载具和武器选择。',
-    controls: {
-      'WASD': '移动角色',
-      '鼠标': '视角控制',
-      'F': '进入/离开载具',
-      'Shift': '奔跑'
+  } else if (tagList.includes('action') || tagList.includes('zombie')) {
+    return {
+      '鼠标': '移动和瞄准',
+      '点击': '攻击',
+      '空格': '特殊技能'
     }
-  },
-  '7': {
-    id: '7',
-    title: 'Drift Hunters Pro',
-    category: '赛车游戏',
-    rating: 4.5,
-    plays: 32000,
-    image: '/images/racing-car.svg',
-    gameUrl: 'https://www.onlinegames.io/games/2023/unity/drift-hunters-pro/index.html',
-    description: 'Drift Hunters Pro是一款专业的漂移赛车游戏，提供多种可升级的车辆和赛道。玩家可以自定义车辆并在不同环境中展示漂移技巧。',
-    controls: {
-      'WASD': '控制车辆',
-      '空格': '手刹',
-      'C': '切换视角',
-      'R': '重置车辆'
+  } else if (tagList.includes('card') || tagList.includes('solitaire')) {
+    return {
+      '鼠标': '点击卡片',
+      '拖拽': '移动卡片'
     }
-  },
-  '8': {
-    id: '8',
-    title: 'Stickman Destruction',
-    category: '动作游戏',
-    rating: 4.4,
-    plays: 28000,
-    image: '/images/monster-survivors.svg',
-    gameUrl: 'https://www.onlinegames.io/games/2023/unity/stickman-destruction/index.html',
-    description: 'Stickman Destruction是一款物理破坏游戏，玩家控制火柴人进行各种危险的特技和破坏活动。游戏具有逼真的物理引擎和搞笑的动画效果。',
-    controls: {
-      '方向键': '控制火柴人',
-      '空格': '跳跃',
-      'R': '重新开始'
-    }
-  },
-  '9': {
-    id: '9',
-    title: 'Real Flight Simulator',
-    category: '模拟游戏',
-    rating: 4.6,
-    plays: 22000,
-    image: '/images/flight-simulator.svg',
-    gameUrl: 'https://www.onlinegames.io/games/2023/unity/real-flight-simulator/index.html',
-    description: 'Real Flight Simulator是一款逼真的飞行模拟游戏，提供多种飞机和详细的驾驶舱视图。玩家可以体验真实的飞行操作和导航系统。',
-    controls: {
-      'WASD': '控制飞机',
-      '鼠标': '视角控制',
-      'F': '起落架',
-      'G': '引擎启动'
+  } else {
+    return {
+      '鼠标': '点击操作',
+      '键盘': '方向键控制'
     }
   }
 }
 
-// 根据路由参数获取当前游戏数据
-const game = computed(() => games[route.params.id])
+// 根据路由参数更新当前游戏
+const updateCurrentGame = () => {
+  if (allGames.value.length > 0) {
+    const gameId = parseInt(route.params.id)
+    game.value = allGames.value.find(g => g.id === gameId)
+  }
+}
+
+// 组件挂载时加载数据
+onMounted(() => {
+  loadAllGames()
+})
+
+// 监听路由变化，当游戏ID改变时更新当前游戏
+watch(() => route.params.id, () => {
+  updateCurrentGame()
+}, { immediate: true })
 
 const topScores = ref([
   {
@@ -355,18 +327,33 @@ const toggleFullscreen = () => {
   }
 }
 
-// 获取除当前游戏外的其他游戏作为相关游戏
-const relatedGames = computed(() => 
-  Object.values(games)
-    .filter(g => g.id !== route.params.id)
-    .slice(0, 4) // 只显示4个相关游戏
-    .map(g => ({
-      id: g.id,
-      title: g.title,
-      category: g.category,
-      image: g.image,
-      rating: g.rating,
-      plays: g.plays
-    }))
-)
+// 获取与当前游戏相关的游戏（优先显示同类型游戏）
+const relatedGames = computed(() => {
+  if (!game.value || !allGames.value.length) return []
+  
+  const currentGameId = parseInt(route.params.id)
+  const currentCategory = game.value.category
+  
+  // 获取除当前游戏外的所有游戏
+  const otherGames = allGames.value.filter(g => g.id !== currentGameId)
+  
+  // 优先获取同类型的游戏
+  const sameCategory = otherGames.filter(g => g.category === currentCategory)
+  
+  // 获取其他类型的游戏
+  const otherCategory = otherGames.filter(g => g.category !== currentCategory)
+  
+  // 合并游戏列表：优先同类型，然后其他类型
+  const combinedGames = [...sameCategory, ...otherCategory]
+  
+  // 只显示4个相关游戏
+  return combinedGames.slice(0, 4).map(g => ({
+    id: g.id,
+    title: g.title,
+    category: g.category,
+    image: g.image,
+    rating: g.rating,
+    plays: g.plays
+  }))
+})
 </script>
