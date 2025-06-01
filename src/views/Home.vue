@@ -1,5 +1,12 @@
 <template>
   <div class="space-y-12">
+    <!-- 性能统计浮动按钮 -->
+    <div class="performance-toggle" @click="togglePerformanceStats" title="查看性能统计 (Ctrl+Shift+P)">
+      📊
+    </div>
+    
+    <!-- 性能统计组件 -->
+    <HomePerformanceStats ref="performanceStatsRef" :load-time="homeLoadTime" />
     <!-- 英雄区域 -->
     <section class="py-8 bg-gray-800 rounded-xl">
       <div class="text-center px-6">
@@ -90,10 +97,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import dataCacheService from '../services/dataCache.js'
+import homeDataCacheService from '../services/homeDataCache.js'
+import dataCacheService from '../services/dataCache.js' // 保留作为备用
+import HomePerformanceStats from '../components/HomePerformanceStats.vue'
 
 const router = useRouter()
 const { t, locale } = useI18n()
@@ -102,23 +111,23 @@ const { t, locale } = useI18n()
 const hotGames = ref([])
 // 最新游戏数据
 const latestGames = ref([])
+const homeLoadTime = ref(0)
+const performanceStatsRef = ref(null)
 
-// 加载热门游戏数据
+// 加载热门游戏数据（使用优化后的首页服务）
 const loadHotGames = async () => {
   try {
-    const data = await dataCacheService.loadAllGames()
-    // 筛选isHot为true的游戏
-    const hotGamesList = data.filter(game => game.isHot === true)
+    const hotGamesList = await homeDataCacheService.loadHotGames()
     hotGames.value = hotGamesList
   } catch (error) {
     console.error('加载热门游戏数据失败:', error)
   }
 }
 
-// 加载游戏分类配置（使用缓存服务）
+// 加载游戏分类配置（使用首页优化服务）
 const loadGameTypes = async () => {
   try {
-    return await dataCacheService.loadGameTypes()
+    return await homeDataCacheService.loadGameTypes()
   } catch (error) {
     console.error('Failed to load game types:', error)
     // 返回空数组，让调用方处理
@@ -157,12 +166,10 @@ const getCategoryFromTags = async (tags) => {
   return 3
 }
 
-// 加载最新游戏数据
+// 加载最新游戏数据（使用优化后的首页服务）
 const loadLatestGames = async () => {
   try {
-    const data = await dataCacheService.loadAllGames()
-    // 筛选isNew为true的游戏，取前4个
-    const newGamesList = data.filter(game => game.isNew === true).slice(0, 4)
+    const newGamesList = await homeDataCacheService.loadNewGames()
     latestGames.value = newGamesList
   } catch (error) {
     console.error('加载最新游戏数据失败:', error)
@@ -172,10 +179,10 @@ const loadLatestGames = async () => {
 // 游戏分类数据
 const gameCategories = ref([])
 
-// 加载游戏分类数据（使用缓存）
+// 加载游戏分类数据（使用优化后的首页服务）
 const loadGameCategories = async () => {
   try {
-    const data = await loadGameTypes() // 使用缓存的游戏分类数据
+    const data = await homeDataCacheService.loadGameTypes()
     // 为每个分类添加随机的游戏数量
     gameCategories.value = data.map(category => ({
       ...category,
@@ -197,6 +204,13 @@ const goToCategory = (categoryId) => {
 // 跳转到游戏详情页面
 const goToGame = (gameId) => {
   router.push(`/game/${gameId}`)
+}
+
+// 性能统计方法
+const togglePerformanceStats = () => {
+  if (performanceStatsRef.value) {
+    performanceStatsRef.value.toggle()
+  }
 }
 
 // 首页SEO优化
@@ -263,11 +277,75 @@ watch(hotGames, () => {
   }
 })
 
-// 组件挂载时加载数据
-onMounted(() => {
-  loadGameCategories()
-  loadHotGames()
-  loadLatestGames()
-  updateHomePageSEO()
+// 组件挂载时加载数据（使用优化后的首页服务）
+onMounted(async () => {
+  try {
+    console.log('🏠 首页开始初始化...')
+    const startTime = performance.now()
+    
+    // 使用首页优化服务统一初始化核心数据
+    const { hotGames: hotGamesData, newGames: newGamesData, gameTypes } = await homeDataCacheService.initializeHome()
+    
+    // 设置数据
+    hotGames.value = hotGamesData
+    latestGames.value = newGamesData
+    
+    // 处理游戏分类数据
+    gameCategories.value = gameTypes.map(category => ({
+      ...category,
+      count: Math.floor(Math.random() * 20) + 10
+    }))
+    
+    const loadTime = Math.round(performance.now() - startTime)
+    homeLoadTime.value = loadTime
+    console.log(`✅ 首页初始化完成，耗时: ${loadTime}ms`)
+    
+    // 更新SEO
+    updateHomePageSEO()
+    
+    // 监听完整游戏列表加载完成事件
+    window.addEventListener('fullGamesListReady', (event) => {
+      console.log(`🎮 完整游戏列表已准备就绪，共 ${event.detail.count} 个游戏`)
+    })
+    
+  } catch (error) {
+    console.error('❌ 首页初始化失败:', error)
+    // 降级到原来的加载方式
+    loadGameCategories()
+    loadHotGames()
+    loadLatestGames()
+    updateHomePageSEO()
+  }
 })
 </script>
+
+<style scoped>
+/* 性能统计浮动按钮 */
+.performance-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  transition: all 0.3s ease;
+  font-size: 20px;
+  color: white;
+}
+
+.performance-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.performance-toggle:active {
+  transform: scale(0.95);
+}
+</style>
