@@ -1,5 +1,14 @@
 <template>
   <div class="min-h-screen">
+    <!-- 加载组件 -->
+    <LoadingSpinner 
+      :show="isLoading" 
+      :title="loadingTitle"
+      :message="loadingMessage"
+      :progress="loadingProgress"
+      :show-progress="showProgress"
+    />
+    
     <header class="bg-gray-800 shadow-lg">
       <nav class="container mx-auto px-4 py-6 flex items-center justify-between">
         <h1 class="text-3xl font-game text-game-accent">Game Corner</h1>
@@ -57,14 +66,25 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import LoadingSpinner from './components/LoadingSpinner.vue'
+import dataCacheService from './services/dataCache.js'
 
 const router = useRouter()
 const route = useRoute()
 const { locale, t } = useI18n()
 const searchQuery = ref('')
+
+// 加载状态管理
+const isLoading = ref(true)
+const loadingTitle = ref('初始化中...')
+const loadingMessage = ref('正在加载游戏数据，请稍候')
+const loadingProgress = ref(0)
+const showProgress = ref(true)
+
+const currentLanguage = computed(() => locale.value)
 
 // 切换语言
 const toggleLanguage = () => {
@@ -80,6 +100,36 @@ const performSearch = () => {
         search: searchQuery.value.trim()
       }
     })
+  }
+}
+
+// 初始化应用
+const initializeApp = async () => {
+  try {
+    loadingProgress.value = 20
+    loadingMessage.value = '加载游戏分类数据...'
+    
+    // 等待数据缓存服务初始化
+    await dataCacheService.initialize()
+    
+    loadingProgress.value = 80
+    loadingMessage.value = '准备就绪...'
+    
+    // 模拟最后的准备时间
+    await new Promise(resolve => setTimeout(resolve, 500))
+    
+    loadingProgress.value = 100
+    
+    // 延迟隐藏加载界面
+    setTimeout(() => {
+      isLoading.value = false
+    }, 300)
+    
+  } catch (error) {
+    console.error('应用初始化失败:', error)
+    loadingTitle.value = '加载失败'
+    loadingMessage.value = '请刷新页面重试'
+    showProgress.value = false
   }
 }
 
@@ -180,5 +230,6 @@ onMounted(() => {
   console.log('App mounted')
   updateMetaTags()
   addStructuredData()
+  initializeApp()
 })
 </script>

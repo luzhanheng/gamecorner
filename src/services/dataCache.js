@@ -10,27 +10,26 @@ class DataCacheService {
     this.isInitialized = false
   }
 
-  // 初始化缓存，预加载所有数据
+  // 初始化缓存，只预加载关键数据
   async initialize() {
     if (this.isInitialized) {
       return
     }
 
     try {
-      console.log('开始预加载游戏数据...')
+      console.log('开始预加载关键数据...')
       
-      // 并行加载所有数据文件
+      // 只预加载游戏列表和类型数据，all-game.json按需加载
       const promises = [
-        this.loadAllGames(),
         this.loadGamesList(),
         this.loadGameTypes()
       ]
 
       await Promise.all(promises)
       this.isInitialized = true
-      console.log('游戏数据预加载完成')
+      console.log('关键数据预加载完成')
     } catch (error) {
-      console.error('预加载游戏数据失败:', error)
+      console.error('预加载数据失败:', error)
     }
   }
 

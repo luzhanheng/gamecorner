@@ -24,4 +24,26 @@
   .game-title {
     @apply text-2xl text-game-accent mb-2;
   }
+  
+  /* 懒加载图片样式 */
+  .lazy-loading {
+    @apply bg-gray-700 animate-pulse;
+    background-image: url('/images/game-placeholder.svg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+  
+  .lazy-loaded {
+    @apply transition-opacity duration-300;
+    opacity: 1;
+  }
+  
+  .lazy-error {
+    @apply bg-gray-600;
+    background-image: url('/images/game-placeholder.svg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
 }
