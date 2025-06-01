@@ -47,6 +47,24 @@ const zh = {
   },
   footer: {
     copyright: '© 2023 Game Station. All rights reserved.'
+  },
+  gameDetail: {
+    loading: '正在加载游戏...',
+    gameDescription: '游戏说明',
+    controls: '操作说明',
+    shareGame: '分享游戏',
+    relatedGames: '相关游戏',
+    fullscreen: '全屏',
+    copied: '已复制',
+    copy: '复制',
+    hideQRCode: '隐藏二维码',
+    showQRCode: '显示二维码分享',
+    startGame: '开始游戏',
+    plays: '次游戏',
+    weixin: '微信',
+    weibo: '微博',
+    qq: 'QQ',
+    copyLink: '复制链接'
   }
 }
 
@@ -97,6 +115,24 @@ const en = {
   },
   footer: {
     copyright: '© 2023 Game Station. All rights reserved.'
+  },
+  gameDetail: {
+    loading: 'Loading game...',
+    gameDescription: 'Game Description',
+    controls: 'Controls',
+    shareGame: 'Share Game',
+    relatedGames: 'Related Games',
+    fullscreen: 'Fullscreen',
+    copied: 'Copied',
+    copy: 'Copy',
+    hideQRCode: 'Hide QR Code',
+    showQRCode: 'Show QR Code',
+    startGame: 'Start Game',
+    plays: 'plays',
+    weixin: 'WeChat',
+    weibo: 'Weibo',
+    qq: 'QQ',
+    copyLink: 'Copy Link'
   }
 }
 

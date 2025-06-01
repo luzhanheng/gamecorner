@@ -4,7 +4,7 @@
     <div v-if="loading || !game" class="flex items-center justify-center min-h-screen">
       <div class="text-center">
         <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-white mx-auto mb-4"></div>
-        <p class="text-white text-lg">正在加载游戏...</p>
+        <p class="text-white text-lg">{{ $t('gameDetail.loading') }}</p>
       </div>
     </div>
 
@@ -28,7 +28,7 @@
                 <span class="ml-1">{{ game.rating }}/5</span>
               </div>
               <span>·</span>
-              <span>{{ game.plays }} 次游戏</span>
+              <span>{{ game.plays }} {{ $t('gameDetail.plays') }}</span>
             </div>
           </div>
         </div>
@@ -42,7 +42,7 @@
             <button 
               @click="toggleFullscreen"
               class="absolute top-4 right-4 z-10 bg-gray-700 hover:bg-gray-600 text-white p-2 rounded-lg transition-colors"
-              title="全屏"
+              :title="$t('gameDetail.fullscreen')"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
@@ -64,7 +64,7 @@
               </div>
             </div>
             <div class="p-6">
-              <h2 class="text-2xl font-game text-game-accent mb-4">游戏说明</h2>
+              <h2 class="text-2xl font-game text-game-accent mb-4">{{ $t('gameDetail.gameDescription') }}</h2>
               <p class="text-gray-300">{{ game.description }}</p>
             </div>
           </div>
@@ -74,7 +74,7 @@
         <div class="space-y-6">
           <!-- 控制说明 -->
           <div v-if="game.controls || game.controls_text" class="bg-gray-800 rounded-lg p-6">
-            <h3 class="text-xl font-game text-game-accent mb-4">操作说明</h3>
+            <h3 class="text-xl font-game text-game-accent mb-4">{{ $t('gameDetail.controls') }}</h3>
             <div class="text-gray-300">
               <!-- 优先使用HTML格式的controls -->
               <div v-if="game.controls" v-html="game.controls" class="controls-content"></div>
@@ -87,7 +87,7 @@
 
           <!-- 分享游戏 -->
           <div class="bg-gray-800 rounded-lg p-6">
-            <h3 class="text-xl font-game text-game-accent mb-4">分享游戏</h3>
+            <h3 class="text-xl font-game text-game-accent mb-4">{{ $t('gameDetail.shareGame') }}</h3>
             <div class="space-y-4">
               <!-- 复制链接 -->
               <div class="flex items-center space-x-2">
@@ -102,7 +102,7 @@
                   class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm"
                   :class="{ 'bg-green-600 hover:bg-green-700': copySuccess }"
                 >
-                  {{ copySuccess ? '已复制' : '复制' }}
+                  {{ copySuccess ? $t('gameDetail.copied') : $t('gameDetail.copy') }}
                 </button>
               </div>
               
@@ -126,7 +126,7 @@
                   @click="toggleQRCode"
                   class="text-blue-400 hover:text-blue-300 transition-colors text-sm"
                 >
-                  {{ showQRCode ? '隐藏二维码' : '显示二维码分享' }}
+                  {{ showQRCode ? $t('gameDetail.hideQRCode') : $t('gameDetail.showQRCode') }}
                 </button>
                 <div v-if="showQRCode" class="mt-4 flex justify-center">
                   <div class="bg-white p-4 rounded-lg">
@@ -141,7 +141,7 @@
 
       <!-- 相关游戏推荐 -->
       <div>
-        <h2 class="text-2xl font-game text-game-accent mb-6">相关游戏</h2>
+        <h2 class="text-2xl font-game text-game-accent mb-6">{{ $t('gameDetail.relatedGames') }}</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div 
             v-for="game in relatedGames" 
@@ -158,9 +158,9 @@
             <div class="p-4">
               <h3 class="game-title text-lg">{{ game.title }}</h3>
               <div class="flex items-center justify-between mt-2">
-                <span class="text-sm text-gray-400">{{ game.category }}</span>
+                <span class="text-sm text-gray-400">{{ getGameTypeTranslation(game.category) }}</span>
                 <a :href="`/game/${game.id}`" target="_blank" class="btn-primary text-sm">
-                  开始游戏
+                  {{ $t('gameDetail.startGame') }}
                 </a>
               </div>
             </div>
@@ -174,9 +174,11 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 const gameIframe = ref(null)
 const allGames = ref([])
 const game = ref(null)
@@ -357,32 +359,32 @@ const copySuccess = ref(false)
 const showQRCode = ref(false)
 const qrCodeContainer = ref(null)
 
-const socials = [
+const socials = computed(() => [
   { 
     name: 'weixin', 
     icon: '🔗', 
-    label: '微信',
+    label: t('gameDetail.weixin'),
     class: 'bg-green-600 hover:bg-green-700 text-white'
   },
   { 
     name: 'weibo', 
     icon: '📱', 
-    label: '微博',
+    label: t('gameDetail.weibo'),
     class: 'bg-red-600 hover:bg-red-700 text-white'
   },
   { 
     name: 'qq', 
     icon: '💬', 
-    label: 'QQ',
+    label: t('gameDetail.qq'),
     class: 'bg-blue-600 hover:bg-blue-700 text-white'
   },
   { 
     name: 'link', 
     icon: '🔗', 
-    label: '复制链接',
+    label: t('gameDetail.copyLink'),
     class: 'bg-gray-600 hover:bg-gray-700 text-white'
   }
-]
+])
 
 // 分享URL计算属性
 const shareUrl = computed(() => {
@@ -527,6 +529,27 @@ const relatedGames = computed(() => {
     plays: g.plays
   }))
 })
+
+// 游戏类型翻译函数
+const getGameTypeTranslation = (category) => {
+  // 创建中文到类型ID的映射
+  const categoryMap = {
+    '益智游戏': 1,
+    '动作游戏': 2,
+    '休闲游戏': 3,
+    '竞速游戏': 4,
+    '体育游戏': 5,
+    '模拟游戏': 6,
+    '策略游戏': 7,
+    '角色扮演': 8
+  }
+  
+  const typeId = categoryMap[category]
+  if (typeId) {
+    return t(`gameTypes.${typeId}`)
+  }
+  return category // 如果没有找到对应翻译，返回原始值
+}
 </script>
 
 <style scoped>
