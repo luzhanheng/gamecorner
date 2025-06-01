@@ -3,42 +3,42 @@
     <!-- 英雄区域 -->
     <section class="py-8 bg-gray-800 rounded-xl">
       <div class="text-center px-6">
-        <h1 class="text-4xl lg:text-5xl font-game text-game-accent mb-4">欢迎来到Game Station</h1>
-        <p class="text-xl text-gray-300">探索精彩的H5游戏世界</p>
+        <h1 class="text-4xl lg:text-5xl font-game text-game-accent mb-4">{{ $t('home.welcome') }}</h1>
+        <p class="text-xl text-gray-300">{{ $t('home.subtitle') }}</p>
       </div>
     </section>
 
     <!-- 游戏分类展示 -->
     <section>
-      <h2 class="text-2xl font-game text-game-secondary mb-6">游戏分类</h2>
+      <h2 class="text-2xl font-game text-game-secondary mb-6">{{ $t('home.categories') }}</h2>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div v-for="category in gameCategories" :key="category.name" 
+        <div v-for="category in gameCategories" :key="category.id" 
              class="bg-gray-800 rounded-lg p-4 flex items-center justify-center hover:bg-gray-700 transition-colors cursor-pointer"
-             @click="goToCategory(category.name)">
+             @click="goToCategory(category.id)">
           <div class="text-3xl mr-4">{{ category.icon }}</div>
-          <h3 class="text-lg font-game text-game-accent">{{ category.name }}</h3>
+          <h3 class="text-lg font-game text-game-accent">{{ $t(`gameTypes.${category.id}`) }}</h3>
         </div>
       </div>
     </section>
 
     <!-- 热门游戏 -->
     <section>
-      <h2 class="text-2xl font-game text-game-secondary mb-6">热门游戏</h2>
+      <h2 class="text-2xl font-game text-game-secondary mb-6">{{ $t('home.hotGames') }}</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div v-for="game in hotGames" :key="game.id" class="game-card">
           <img :src="game.image" :alt="game.title" class="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity" @click="goToGame(game.id)">
           <div class="p-4">
             <h3 class="game-title">{{ game.title }}</h3>
             <div class="flex items-center justify-between text-sm text-gray-400 mb-2">
-              <span>{{ game.category }}</span>
+              <span>{{ $t(`gameTypes.${game.category}`) }}</span>
               <div class="flex items-center">
                 <span class="text-game-accent">★</span>
-                <span class="ml-1">{{ game.rating }}</span>
+                <span class="ml-1">4.5</span>
               </div>
             </div>
-            <p class="text-gray-500 text-sm mb-4">{{ game.plays }} 次游戏</p>
+            <p class="text-gray-500 text-sm mb-4">{{ game.plays }} {{ $t('games.plays') }}</p>
             <router-link :to="`/game/${game.id}`" class="btn-primary block text-center">
-              立即游戏
+              {{ $t('home.playNow') }}
             </router-link>
           </div>
         </div>
@@ -48,7 +48,7 @@
 
     <!-- 最新游戏 -->
     <section>
-      <h2 class="text-2xl font-game text-game-secondary mb-6">最新上线</h2>
+      <h2 class="text-2xl font-game text-game-secondary mb-6">{{ $t('home.latestGames') }}</h2>
       <div class="bg-gray-800 rounded-lg p-6">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div v-for="game in latestGames" :key="game.id" 
@@ -56,33 +56,33 @@
                @click="goToGame(game.id)">
             <img :src="game.image" :alt="game.title" class="w-full h-24 object-cover rounded mb-3">
             <h4 class="text-sm font-game text-game-accent mb-1">{{ game.title }}</h4>
-            <p class="text-xs text-gray-400">{{ game.category }}</p>
+            <p class="text-xs text-gray-400">{{ $t(`gameTypes.${game.category}`) }}</p>
           </div>
         </div>
         <div class="text-center mt-6">
-          <router-link to="/games" class="btn-secondary">查看更多游戏</router-link>
+          <router-link to="/games" class="btn-secondary">{{ $t('home.viewMore') }}</router-link>
         </div>
       </div>
     </section>
 
     <!-- 特色功能 -->
     <section>
-      <h2 class="text-2xl font-game text-game-secondary mb-6">为什么选择我们</h2>
+      <h2 class="text-2xl font-game text-game-secondary mb-6">{{ $t('home.whyChooseUs') }}</h2>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="bg-gray-800 rounded-lg p-6 text-center">
           <div class="text-4xl mb-4">🎮</div>
-          <h3 class="text-xl font-game text-game-accent mb-3">精品游戏</h3>
-          <p class="text-gray-400">精心挑选的高质量H5游戏，无需下载即可畅玩</p>
+          <h3 class="text-xl font-game text-game-accent mb-3">{{ $t('home.qualityGames') }}</h3>
+          <p class="text-gray-400">{{ $t('home.qualityGamesDesc') }}</p>
         </div>
         <div class="bg-gray-800 rounded-lg p-6 text-center">
           <div class="text-4xl mb-4">⚡</div>
-          <h3 class="text-xl font-game text-game-accent mb-3">极速加载</h3>
-          <p class="text-gray-400">优化的游戏加载技术，让您秒进游戏世界</p>
+          <h3 class="text-xl font-game text-game-accent mb-3">{{ $t('home.fastLoading') }}</h3>
+          <p class="text-gray-400">{{ $t('home.fastLoadingDesc') }}</p>
         </div>
         <div class="bg-gray-800 rounded-lg p-6 text-center">
           <div class="text-4xl mb-4">📱</div>
-          <h3 class="text-xl font-game text-game-accent mb-3">多端适配</h3>
-          <p class="text-gray-400">完美支持手机、平板、电脑，随时随地畅玩</p>
+          <h3 class="text-xl font-game text-game-accent mb-3">{{ $t('home.multiPlatform') }}</h3>
+          <p class="text-gray-400">{{ $t('home.multiPlatformDesc') }}</p>
         </div>
       </div>
     </section>
@@ -92,8 +92,10 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
+const { t } = useI18n()
 
 // 热门游戏数据
 const hotGames = ref([])
@@ -133,13 +135,18 @@ const loadGameTypes = async () => {
 
 // 根据标签推断游戏类别
 const getCategoryFromTags = async (tags) => {
-  if (!tags) return '休闲游戏'
+  if (!tags) return 3 // 默认返回休闲游戏的ID
   
   // 获取游戏分类配置
   const gameTypes = await loadGameTypes()
   
-  // 将游戏标签按逗号分割并清理空格
-  const gameTags = tags.split(',').map(tag => tag.trim().toLowerCase())
+  // 处理标签：如果是数组直接使用，如果是字符串则分割
+  let gameTags
+  if (Array.isArray(tags)) {
+    gameTags = tags.map(tag => tag.toLowerCase())
+  } else {
+    gameTags = tags.split(',').map(tag => tag.trim().toLowerCase())
+  }
   
   // 遍历每个分类，检查是否有匹配的标签
   for (const category of gameTypes) {
@@ -149,12 +156,12 @@ const getCategoryFromTags = async (tags) => {
     const hasMatch = gameTags.some(gameTag => categoryTags.includes(gameTag))
     
     if (hasMatch) {
-      return category.name
+      return category.id
     }
   }
   
-  // 如果没有匹配到任何分类，默认返回休闲游戏
-  return '休闲游戏'
+  // 如果没有匹配到任何分类，默认返回休闲游戏的ID
+  return 3
 }
 
 // 加载最新游戏数据
@@ -174,22 +181,28 @@ const loadLatestGames = async () => {
 }
 
 // 游戏分类数据
-const gameCategories = ref([
-  { name: '益智游戏', icon: '🧩', count: 22 },
-  { name: '动作游戏', icon: '⚔️', count: 18 },
-  { name: '休闲游戏', icon: '🎮', count: 32 },
-  { name: '赛车游戏', icon: '🏎️', count: 15 },
-  { name: '体育游戏', icon: '⚽', count: 12 },
-  { name: '模拟游戏', icon: '🏗️', count: 20 },
-  { name: '策略游戏', icon: '♟️', count: 16 },
-  { name: '角色扮演', icon: '🗡️', count: 14 }
-])
+const gameCategories = ref([])
+
+// 加载游戏分类数据
+const loadGameCategories = async () => {
+  try {
+    const response = await fetch('/type-game.json')
+    const data = await response.json()
+    // 为每个分类添加随机的游戏数量
+    gameCategories.value = data.map(category => ({
+      ...category,
+      count: Math.floor(Math.random() * 20) + 10 // 随机生成10-30的游戏数量
+    }))
+  } catch (error) {
+    console.error('加载游戏分类数据失败:', error)
+  }
+}
 
 // 跳转到游戏分类页面
-const goToCategory = (categoryName) => {
+const goToCategory = (categoryId) => {
   router.push({
     path: '/games',
-    query: { category: categoryName }
+    query: { categoryId: categoryId }
   })
 }
 
@@ -200,6 +213,7 @@ const goToGame = (gameId) => {
 
 // 组件挂载时加载数据
 onMounted(() => {
+  loadGameCategories()
   loadHotGames()
   loadLatestGames()
 })

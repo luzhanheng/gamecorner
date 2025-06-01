@@ -3,7 +3,7 @@
     <!-- 加载状态 -->
     <div v-if="loading" class="loading-container flex justify-center items-center py-12">
       <div class="loading-spinner animate-spin rounded-full h-12 w-12 border-b-2 border-game-accent"></div>
-      <p class="ml-4 text-gray-300">正在加载游戏列表...</p>
+      <p class="ml-4 text-gray-300">{{ $t('games.loading') }}</p>
     </div>
     
     <!-- 搜索和筛选 -->
@@ -12,28 +12,29 @@
         <input 
           type="text" 
           v-model="searchQuery" 
-          placeholder="搜索游戏..." 
+          :placeholder="$t('nav.search')" 
           class="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-game-accent"
         >
       </div>
       <div class="flex gap-4">
         <select 
           v-model="selectedCategory" 
+          @change="updateCategoryURL"
           class="px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-game-accent"
         >
-          <option value="">所有类别</option>
-          <option v-for="category in categories" :key="category" :value="category">
-            {{ category }}
+          <option value="">{{ $t('games.all') }}</option>
+          <option v-for="category in categories" :key="category.id" :value="category.id">
+            {{ $t(`gameTypes.${category.id}`) }}
           </option>
         </select>
         <select 
           v-model="sortBy" 
           class="px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-game-accent"
         >
-          <option value="plays">最受欢迎</option>
-          <option value="date">最新发布</option>
-          <option value="rating">评分最高</option>
-          <option value="title">按名称</option>
+          <option value="plays">{{ $t('games.sortByPlays') }}</option>
+          <option value="date">{{ $t('games.sortByDate') }}</option>
+          <option value="rating">{{ $t('games.sortByRating') }}</option>
+          <option value="title">{{ $t('games.sortByTitle') }}</option>
         </select>
       </div>
     </div>
@@ -59,17 +60,17 @@
         <div class="p-4">
           <div class="flex items-center justify-between mb-2">
             <h3 class="game-title text-xl">{{ game.title }}</h3>
-            <span class="text-sm text-gray-400">{{ game.category }}</span>
+            <span class="text-sm text-gray-400">{{ getCategoryDisplayName(game.category) }}</span>
           </div>
           <p class="text-gray-400 mb-4 line-clamp-2">{{ game.description }}</p>
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-2">
-              <span class="text-sm text-gray-400">{{ game.plays }} 次游戏</span>
+              <span class="text-sm text-gray-400">{{ game.plays }} {{ $t('games.plays') }}</span>
               <span class="text-sm text-gray-400">·</span>
               <span class="text-sm text-gray-400">{{ game.date }}</span>
             </div>
             <router-link :to="`/game/${game.id}`" class="btn-primary text-sm">
-              开始游戏
+              {{ $t('home.playNow') }}
             </router-link>
           </div>
         </div>
@@ -98,13 +99,26 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 
 // 跳转到游戏详情页
 const goToGame = (gameId) => {
   router.push(`/game/${gameId}`)
+}
+
+// 更新分类URL
+const updateCategoryURL = () => {
+  const query = { ...route.query }
+  if (selectedCategory.value && selectedCategory.value !== '') {
+    query.categoryId = selectedCategory.value
+  } else {
+    delete query.categoryId
+  }
+  router.push({ query })
 }
 
 // 游戏数据
@@ -113,7 +127,7 @@ const loading = ref(true)
 
 // 全局缓存
 let gamesListCache = null
-let gameTypesCache = null
+const gameTypesCache = ref(null)
 
 // 快速加载游戏列表（用于展示）
 const loadGamesList = async () => {
@@ -156,8 +170,8 @@ const loadAllGames = async () => {
     const data = await response.json()
     
     // 预加载游戏分类配置
-    if (!gameTypesCache) {
-      gameTypesCache = await loadGameTypes()
+    if (!gameTypesCache.value) {
+      gameTypesCache.value = await loadGameTypes()
     }
     
     // 批量处理游戏数据，使用同步方式提升性能
@@ -166,7 +180,7 @@ const loadAllGames = async () => {
       title: game.title,
       image: game.image,
       description: game.description,
-      category: getCategoryFromTagsSync(game.tags, gameTypesCache),
+      category: getCategoryFromTagsSync(game.tags, gameTypesCache.value),
       rating: (4.0 + Math.random() * 1.0).toFixed(1),
       plays: Math.floor(Math.random() * 50000) + 10000,
       date: generateRandomDate()
@@ -196,7 +210,7 @@ const loadGameTypes = async () => {
 
 // 同步版本的分类推断（用于性能优化）
 const getCategoryFromTagsSync = (tags, gameTypes) => {
-  if (!tags || !gameTypes) return '休闲游戏'
+  if (!tags || !gameTypes) return 3 // 默认返回休闲游戏的ID
   
   // 将游戏标签按逗号分割并清理空格
   const gameTags = tags.split(',').map(tag => tag.trim().toLowerCase())
@@ -209,20 +223,20 @@ const getCategoryFromTagsSync = (tags, gameTypes) => {
     const hasMatch = gameTags.some(gameTag => categoryTags.includes(gameTag))
     
     if (hasMatch) {
-      return category.name
+      return category.id
     }
   }
   
-  // 如果没有匹配到任何分类，默认返回休闲游戏
-  return '休闲游戏'
+  // 如果没有匹配到任何分类，默认返回休闲游戏的ID
+  return 3
 }
 
 // 根据标签推断游戏类别（异步版本，保持兼容）
 const getCategoryFromTags = async (tags) => {
-  if (!gameTypesCache) {
-    gameTypesCache = await loadGameTypes()
+  if (!gameTypesCache.value) {
+    gameTypesCache.value = await loadGameTypes()
   }
-  return getCategoryFromTagsSync(tags, gameTypesCache)
+  return getCategoryFromTagsSync(tags, gameTypesCache.value)
 }
 
 // 生成随机日期
@@ -233,11 +247,49 @@ const generateRandomDate = () => {
   return new Date(randomTime).toISOString().split('T')[0]
 }
 
-// 从游戏数据中动态获取分类
+// 获取所有可用的游戏分类
 const categories = computed(() => {
-  const uniqueCategories = [...new Set(games.value.map(game => game.category))]
-  return uniqueCategories.filter(category => category && category.trim() !== '')
+  if (!gameTypesCache.value) {
+    return []
+  }
+  return gameTypesCache.value.filter(category => category.id)
 })
+
+// 获取分类显示名称
+const getCategoryDisplayName = (category) => {
+  if (!category) return ''
+  
+  let categoryId = null
+  
+  // 如果category是数字ID，直接使用
+  if (typeof category === 'number') {
+    categoryId = category
+  }
+  
+  // 如果category是字符串，可能是中文名称或数字字符串
+  if (typeof category === 'string') {
+    // 尝试转换为数字
+    const parsedId = parseInt(category)
+    if (!isNaN(parsedId)) {
+      categoryId = parsedId
+    } else {
+      // 如果是中文名称，通过gameTypesCache查找对应的ID
+      if (gameTypesCache.value) {
+        const categoryInfo = gameTypesCache.value.find(cat => cat.name === category)
+        if (categoryInfo) {
+          categoryId = categoryInfo.id
+        }
+      }
+    }
+  }
+  
+  // 使用国际化翻译
+  if (categoryId) {
+    return t(`gameTypes.${categoryId}`)
+  }
+  
+  return ''
+}
 const searchQuery = ref('')
 const selectedCategory = ref('')
 const sortBy = ref('plays')
@@ -245,11 +297,16 @@ const currentPage = ref(1)
 const itemsPerPage = 12
 
 // 组件挂载时加载数据
-onMounted(() => {
+onMounted(async () => {
+  // 先加载游戏分类配置
+  if (!gameTypesCache.value) {
+    gameTypesCache.value = await loadGameTypes()
+  }
+  
   loadGamesList()
   // 检查URL参数并设置初始筛选条件
-  if (route.query.category) {
-    selectedCategory.value = route.query.category
+  if (route.query.categoryId) {
+    selectedCategory.value = route.query.categoryId
   }
   if (route.query.search) {
     searchQuery.value = route.query.search
@@ -258,24 +315,26 @@ onMounted(() => {
 
 // 监听路由变化
 watch(() => route.query, (newQuery) => {
-  if (newQuery.category) {
-    selectedCategory.value = newQuery.category
+  if (newQuery.categoryId) {
+    selectedCategory.value = newQuery.categoryId
   } else {
     selectedCategory.value = ''
   }
   if (newQuery.search) {
     searchQuery.value = newQuery.search
-  } else if (!newQuery.category) {
+  } else if (!newQuery.categoryId) {
     searchQuery.value = ''
   }
   // 路由变化时重置到第一页
   currentPage.value = 1
-}, { immediate: true })
+})
 
 // 监听搜索和分类变化，重置到第一页
 watch([searchQuery, selectedCategory, sortBy], () => {
   currentPage.value = 1
 })
+
+
 
 // 所有过滤后的游戏（用于计算总页数）
 const allFilteredGames = computed(() => {
@@ -283,15 +342,43 @@ const allFilteredGames = computed(() => {
 
   // 搜索过滤
   if (searchQuery.value) {
-    result = result.filter(game =>
-      game.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      game.description.toLowerCase().includes(searchQuery.value.toLowerCase())
-    )
+    const query = searchQuery.value.toLowerCase()
+    result = result.filter(game => {
+      // 获取分类名称用于搜索
+      const categoryName = gameTypesCache.value?.find(cat => cat.id === game.category)?.name || ''
+      return game.title.toLowerCase().includes(query) ||
+             game.description.toLowerCase().includes(query) ||
+             categoryName.toLowerCase().includes(query)
+    })
   }
 
   // 类别过滤
-  if (selectedCategory.value) {
-    result = result.filter(game => game.category === selectedCategory.value)
+  if (selectedCategory.value && selectedCategory.value !== '') {
+    const categoryId = parseInt(selectedCategory.value)
+    if (!isNaN(categoryId)) {
+      result = result.filter(game => {
+        // 如果游戏的category是数字，直接比较
+        if (typeof game.category === 'number') {
+          return game.category === categoryId
+        }
+        // 如果游戏的category是字符串，需要根据情况处理
+        if (typeof game.category === 'string') {
+          // 尝试转换为数字比较
+          const gameCategoryId = parseInt(game.category)
+          if (!isNaN(gameCategoryId)) {
+            return gameCategoryId === categoryId
+          }
+          // 如果是中文名称，需要通过gameTypesCache查找对应的ID
+          if (gameTypesCache.value) {
+            const categoryInfo = gameTypesCache.value.find(cat => cat.name === game.category)
+            if (categoryInfo) {
+              return categoryInfo.id === categoryId
+            }
+          }
+        }
+        return false
+      })
+    }
   }
 
   // 排序
