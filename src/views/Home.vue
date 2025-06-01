@@ -93,6 +93,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import dataCacheService from '../services/dataCache.js'
 
 const router = useRouter()
 const { t } = useI18n()
@@ -105,8 +106,7 @@ const latestGames = ref([])
 // 加载热门游戏数据
 const loadHotGames = async () => {
   try {
-    const response = await fetch('/hot-game.json')
-    const data = await response.json()
+    const data = await dataCacheService.loadHotGames()
     // 为每个游戏添加额外的显示属性
     hotGames.value = await Promise.all(data.map(async (game, index) => ({
       ...game,
@@ -120,12 +120,10 @@ const loadHotGames = async () => {
   }
 }
 
-// 加载游戏分类配置
+// 加载游戏分类配置（使用缓存服务）
 const loadGameTypes = async () => {
   try {
-    const response = await fetch('/type-game.json')
-    const gameTypes = await response.json()
-    return gameTypes
+    return await dataCacheService.loadGameTypes()
   } catch (error) {
     console.error('Failed to load game types:', error)
     // 返回空数组，让调用方处理
@@ -137,7 +135,7 @@ const loadGameTypes = async () => {
 const getCategoryFromTags = async (tags) => {
   if (!tags) return 3 // 默认返回休闲游戏的ID
   
-  // 获取游戏分类配置
+  // 获取游戏分类配置（使用缓存）
   const gameTypes = await loadGameTypes()
   
   // 处理标签：如果是数组直接使用，如果是字符串则分割
@@ -167,8 +165,7 @@ const getCategoryFromTags = async (tags) => {
 // 加载最新游戏数据
 const loadLatestGames = async () => {
   try {
-    const response = await fetch('/all-game.json')
-    const data = await response.json()
+    const data = await dataCacheService.loadAllGames()
     // 取最后4个游戏作为最新游戏
     latestGames.value = await Promise.all(data.slice(-4).map(async (game, index) => ({
       ...game,
@@ -183,11 +180,10 @@ const loadLatestGames = async () => {
 // 游戏分类数据
 const gameCategories = ref([])
 
-// 加载游戏分类数据
+// 加载游戏分类数据（使用缓存）
 const loadGameCategories = async () => {
   try {
-    const response = await fetch('/type-game.json')
-    const data = await response.json()
+    const data = await loadGameTypes() // 使用缓存的游戏分类数据
     // 为每个分类添加随机的游戏数量
     gameCategories.value = data.map(category => ({
       ...category,

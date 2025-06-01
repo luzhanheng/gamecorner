@@ -100,6 +100,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import dataCacheService from '../services/dataCache.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -143,14 +144,11 @@ const loadGamesList = async () => {
     
     // 尝试加载轻量级游戏列表
     try {
-      const response = await fetch('/games-list.json')
-      if (response.ok) {
-        const data = await response.json()
-        games.value = data
-        gamesListCache = data
-        loading.value = false
-        return
-      }
+      const data = await dataCacheService.loadGamesList()
+      games.value = data
+      gamesListCache = data
+      loading.value = false
+      return
     } catch (error) {
       console.log('轻量级列表不存在，回退到完整数据加载')
     }
@@ -166,8 +164,7 @@ const loadGamesList = async () => {
 // 加载所有游戏数据（回退方案）
 const loadAllGames = async () => {
   try {
-    const response = await fetch('/all-game.json')
-    const data = await response.json()
+    const data = await dataCacheService.loadAllGames()
     
     // 预加载游戏分类配置
     if (!gameTypesCache.value) {
@@ -198,9 +195,7 @@ const loadAllGames = async () => {
 // 加载游戏分类配置
 const loadGameTypes = async () => {
   try {
-    const response = await fetch('/type-game.json')
-    const gameTypes = await response.json()
-    return gameTypes
+    return await dataCacheService.loadGameTypes()
   } catch (error) {
     console.error('Failed to load game types:', error)
     // 返回空数组，让调用方处理
