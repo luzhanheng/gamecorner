@@ -90,13 +90,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import dataCacheService from '../services/dataCache.js'
 
 const router = useRouter()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 // 热门游戏数据
 const hotGames = ref([])
@@ -207,10 +207,75 @@ const goToGame = (gameId) => {
   router.push(`/game/${gameId}`)
 }
 
+// 首页SEO优化
+const updateHomePageSEO = () => {
+  // 更新页面标题
+  const title = locale.value === 'zh'
+    ? 'Game Corner | 国内外H5游戏平台 - 免费HTML5网页游戏在线玩'
+    : 'Game Corner | Free Online HTML5 Games Platform'
+  document.title = title
+
+  // 添加首页特定的结构化数据
+  const existingScript = document.querySelector('script[data-page="home"]')
+  if (existingScript) {
+    existingScript.remove()
+  }
+
+  const homeStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": `${window.location.origin}/#webpage`,
+    "url": window.location.origin,
+    "name": title,
+    "description": locale.value === 'zh'
+      ? 'Game Corner是您免费在线HTML5游戏的一站式目的地！我们拥有各种类型的大量游戏收藏，如动作、冒险、益智、策略、体育等。直接在浏览器中玩我们的游戏，无需下载任何内容。'
+      : 'Your one-stop destination for free online HTML5 games! We have a huge collection of games in various genres like action, adventure, puzzle, strategy, sports, and many more. Play our games directly on your browser without the need to download anything. Have fun and enjoy!',
+    "isPartOf": {
+      "@type": "WebSite",
+      "@id": `${window.location.origin}/#website`,
+      "name": "Game Corner"
+    },
+    "breadcrumb": {
+      "@type": "BreadcrumbList",
+      "itemListElement": [{
+        "@type": "ListItem",
+        "position": 1,
+        "name": locale.value === 'zh' ? '首页' : 'Home',
+        "item": window.location.origin
+      }]
+    },
+    "mainEntity": {
+      "@type": "ItemList",
+      "name": locale.value === 'zh' ? '热门游戏' : 'Popular Games',
+      "description": locale.value === 'zh' ? '最受欢迎的HTML5游戏' : 'Most popular HTML5 games',
+      "numberOfItems": hotGames.value.length
+    }
+  }
+
+  const script = document.createElement('script')
+  script.type = 'application/ld+json'
+  script.setAttribute('data-page', 'home')
+  script.textContent = JSON.stringify(homeStructuredData)
+  document.head.appendChild(script)
+}
+
+// 监听语言变化
+watch(locale, () => {
+  updateHomePageSEO()
+})
+
+// 监听热门游戏数据变化，更新结构化数据
+watch(hotGames, () => {
+  if (hotGames.value.length > 0) {
+    updateHomePageSEO()
+  }
+})
+
 // 组件挂载时加载数据
 onMounted(() => {
   loadGameCategories()
   loadHotGames()
   loadLatestGames()
+  updateHomePageSEO()
 })
 </script>

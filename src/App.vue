@@ -2,7 +2,7 @@
   <div class="min-h-screen">
     <header class="bg-gray-800 shadow-lg">
       <nav class="container mx-auto px-4 py-6 flex items-center justify-between">
-        <h1 class="text-3xl font-game text-game-accent">Game Station</h1>
+        <h1 class="text-3xl font-game text-game-accent">Game Corner</h1>
         <div class="flex items-center space-x-4">
           <router-link to="/" class="btn-primary">{{ $t('nav.home') }}</router-link>
           
@@ -57,12 +57,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
-const { locale } = useI18n()
+const route = useRoute()
+const { locale, t } = useI18n()
 const searchQuery = ref('')
 
 // 切换语言
@@ -82,7 +83,102 @@ const performSearch = () => {
   }
 }
 
+// 添加结构化数据
+const addStructuredData = () => {
+  // 移除已存在的结构化数据
+  const existingScript = document.querySelector('script[type="application/ld+json"]')
+  if (existingScript) {
+    existingScript.remove()
+  }
+
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Game Corner",
+    "description": locale.value === 'zh' 
+      ? "Game Corner是您免费在线HTML5游戏的一站式目的地！我们拥有各种类型的大量游戏收藏，如动作、冒险、益智、策略、体育等。"
+      : "Your one-stop destination for free online HTML5 games! We have a huge collection of games in various genres like action, adventure, puzzle, strategy, sports, and many more.",
+    "url": window.location.origin,
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": `${window.location.origin}/games?search={search_term_string}`
+      },
+      "query-input": "required name=search_term_string"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Game Corner"
+    },
+    "inLanguage": ["zh-CN", "en-US"],
+    "keywords": locale.value === 'zh'
+      ? "国内外h5游戏,html5小游戏,html5手机游戏,免费html5网页游戏在线玩,免费H5,在线游戏"
+      : "free online HTML5 games,browser games,web games,mobile games,action games,adventure games,puzzle games,strategy games,sports games,online gaming"
+  }
+
+  const script = document.createElement('script')
+  script.type = 'application/ld+json'
+  script.textContent = JSON.stringify(structuredData)
+  document.head.appendChild(script)
+}
+
+// 更新页面meta标签
+const updateMetaTags = () => {
+  // 更新页面标题
+  const title = locale.value === 'zh'
+    ? 'Game Corner | 国内外H5游戏平台 - 免费HTML5网页游戏在线玩'
+    : 'Game Corner | Free Online HTML5 Games Platform'
+  document.title = title
+
+  // 更新描述
+  const description = locale.value === 'zh'
+    ? 'Game Corner是您免费在线HTML5游戏的一站式目的地！我们拥有各种类型的大量游戏收藏，如动作、冒险、益智、策略、体育等。直接在浏览器中玩我们的游戏，无需下载任何内容。'
+    : 'Your one-stop destination for free online HTML5 games! We have a huge collection of games in various genres like action, adventure, puzzle, strategy, sports, and many more. Play our games directly on your browser without the need to download anything. Have fun and enjoy!'
+  
+  const metaDescription = document.querySelector('meta[name="description"]')
+  if (metaDescription) {
+    metaDescription.setAttribute('content', description)
+  }
+
+  // 更新Open Graph标签
+  const ogTitle = document.querySelector('meta[property="og:title"]')
+  if (ogTitle) {
+    ogTitle.setAttribute('content', title)
+  }
+
+  const ogDescription = document.querySelector('meta[property="og:description"]')
+  if (ogDescription) {
+    ogDescription.setAttribute('content', description)
+  }
+
+  // 更新Twitter Card标签
+  const twitterTitle = document.querySelector('meta[name="twitter:title"]')
+  if (twitterTitle) {
+    twitterTitle.setAttribute('content', title)
+  }
+
+  const twitterDescription = document.querySelector('meta[name="twitter:description"]')
+  if (twitterDescription) {
+    twitterDescription.setAttribute('content', description)
+  }
+}
+
+// 监听语言变化
+watch(locale, () => {
+  updateMetaTags()
+  addStructuredData()
+})
+
+// 监听路由变化，更新页面SEO信息
+watch(route, () => {
+  updateMetaTags()
+  addStructuredData()
+})
+
 onMounted(() => {
   console.log('App mounted')
+  updateMetaTags()
+  addStructuredData()
 })
 </script>
