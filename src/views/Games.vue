@@ -1,7 +1,13 @@
 <template>
   <div class="space-y-8">
+    <!-- 加载状态 -->
+    <div v-if="loading" class="loading-container flex justify-center items-center py-12">
+      <div class="loading-spinner animate-spin rounded-full h-12 w-12 border-b-2 border-game-accent"></div>
+      <p class="ml-4 text-gray-300">正在加载游戏列表...</p>
+    </div>
+    
     <!-- 搜索和筛选 -->
-    <div class="flex flex-wrap gap-4 items-center justify-between bg-gray-800 p-6 rounded-lg">
+    <div v-else class="flex flex-wrap gap-4 items-center justify-between bg-gray-800 p-6 rounded-lg">
       <div class="flex-1 min-w-[200px]">
         <input 
           type="text" 
@@ -24,15 +30,16 @@
           v-model="sortBy" 
           class="px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-game-accent"
         >
-          <option value="popular">最受欢迎</option>
-          <option value="newest">最新发布</option>
+          <option value="plays">最受欢迎</option>
+          <option value="date">最新发布</option>
           <option value="rating">评分最高</option>
+          <option value="title">按名称</option>
         </select>
       </div>
     </div>
 
     <!-- 游戏列表 -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div v-if="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       <div 
         v-for="game in filteredGames" 
         :key="game.id" 
@@ -102,23 +109,75 @@ const goToGame = (gameId) => {
 
 // 游戏数据
 const games = ref([])
+const loading = ref(true)
 
-// 加载所有游戏数据
+// 全局缓存
+let gamesListCache = null
+let gameTypesCache = null
+
+// 快速加载游戏列表（用于展示）
+const loadGamesList = async () => {
+  try {
+    loading.value = true
+    
+    // 如果有缓存，直接使用
+    if (gamesListCache) {
+      games.value = gamesListCache
+      loading.value = false
+      return
+    }
+    
+    // 尝试加载轻量级游戏列表
+    try {
+      const response = await fetch('/games-list.json')
+      if (response.ok) {
+        const data = await response.json()
+        games.value = data
+        gamesListCache = data
+        loading.value = false
+        return
+      }
+    } catch (error) {
+      console.log('轻量级列表不存在，回退到完整数据加载')
+    }
+    
+    // 回退到完整数据加载
+    await loadAllGames()
+  } catch (error) {
+    console.error('加载游戏列表失败:', error)
+    loading.value = false
+  }
+}
+
+// 加载所有游戏数据（回退方案）
 const loadAllGames = async () => {
   try {
     const response = await fetch('/all-game.json')
     const data = await response.json()
-    // 为每个游戏添加额外的显示属性
-    games.value = await Promise.all(data.map(async (game, index) => ({
-      ...game,
+    
+    // 预加载游戏分类配置
+    if (!gameTypesCache) {
+      gameTypesCache = await loadGameTypes()
+    }
+    
+    // 批量处理游戏数据，使用同步方式提升性能
+    games.value = data.map((game, index) => ({
       id: index + 1,
-      category: await getCategoryFromTags(game.tags),
-      rating: (4.0 + Math.random() * 1.0).toFixed(1), // 随机生成4.0-5.0的评分
-      plays: Math.floor(Math.random() * 50000) + 10000, // 随机生成游戏次数
-      date: generateRandomDate() // 生成随机日期
-    })))
+      title: game.title,
+      image: game.image,
+      description: game.description,
+      category: getCategoryFromTagsSync(game.tags, gameTypesCache),
+      rating: (4.0 + Math.random() * 1.0).toFixed(1),
+      plays: Math.floor(Math.random() * 50000) + 10000,
+      date: generateRandomDate()
+    }))
+    
+    // 缓存处理后的数据
+    gamesListCache = games.value
+    loading.value = false
   } catch (error) {
     console.error('加载游戏数据失败:', error)
+    loading.value = false
   }
 }
 
@@ -135,12 +194,9 @@ const loadGameTypes = async () => {
   }
 }
 
-// 根据标签推断游戏类别
-const getCategoryFromTags = async (tags) => {
-  if (!tags) return '休闲游戏'
-  
-  // 获取游戏分类配置
-  const gameTypes = await loadGameTypes()
+// 同步版本的分类推断（用于性能优化）
+const getCategoryFromTagsSync = (tags, gameTypes) => {
+  if (!tags || !gameTypes) return '休闲游戏'
   
   // 将游戏标签按逗号分割并清理空格
   const gameTags = tags.split(',').map(tag => tag.trim().toLowerCase())
@@ -161,6 +217,14 @@ const getCategoryFromTags = async (tags) => {
   return '休闲游戏'
 }
 
+// 根据标签推断游戏类别（异步版本，保持兼容）
+const getCategoryFromTags = async (tags) => {
+  if (!gameTypesCache) {
+    gameTypesCache = await loadGameTypes()
+  }
+  return getCategoryFromTagsSync(tags, gameTypesCache)
+}
+
 // 生成随机日期
 const generateRandomDate = () => {
   const start = new Date(2023, 8, 1) // 2023年9月1日
@@ -169,16 +233,20 @@ const generateRandomDate = () => {
   return new Date(randomTime).toISOString().split('T')[0]
 }
 
-const categories = ['益智游戏', '休闲游戏', '动作游戏', '赛车游戏', '体育游戏', '模拟游戏', '策略游戏', '角色扮演']
+// 从游戏数据中动态获取分类
+const categories = computed(() => {
+  const uniqueCategories = [...new Set(games.value.map(game => game.category))]
+  return uniqueCategories.filter(category => category && category.trim() !== '')
+})
 const searchQuery = ref('')
 const selectedCategory = ref('')
-const sortBy = ref('popular')
+const sortBy = ref('plays')
 const currentPage = ref(1)
 const itemsPerPage = 12
 
 // 组件挂载时加载数据
 onMounted(() => {
-  loadAllGames()
+  loadGamesList()
   // 检查URL参数并设置初始筛选条件
   if (route.query.category) {
     selectedCategory.value = route.query.category
@@ -229,12 +297,14 @@ const allFilteredGames = computed(() => {
   // 排序
   result.sort((a, b) => {
     switch (sortBy.value) {
-      case 'popular':
+      case 'plays':
         return b.plays - a.plays
-      case 'newest':
+      case 'date':
         return new Date(b.date) - new Date(a.date)
       case 'rating':
-        return b.rating - a.rating
+        return parseFloat(b.rating) - parseFloat(a.rating)
+      case 'title':
+        return a.title.localeCompare(b.title)
       default:
         return 0
     }
