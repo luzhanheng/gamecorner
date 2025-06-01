@@ -530,22 +530,37 @@ const relatedGames = computed(() => {
 
 // 游戏类型翻译函数
 const getGameTypeTranslation = (category) => {
-  // 创建中文到类型ID的映射
-  const categoryMap = {
-    '益智游戏': 1,
-    '动作游戏': 2,
-    '休闲游戏': 3,
-    '竞速游戏': 4,
-    '体育游戏': 5,
-    '模拟游戏': 6,
-    '策略游戏': 7,
-    '角色扮演': 8
+  if (!category) return ''
+  
+  let categoryId = null
+  
+  // 如果category是数字ID，直接使用
+  if (typeof category === 'number') {
+    categoryId = category
   }
   
-  const typeId = categoryMap[category]
-  if (typeId) {
-    return t(`gameTypes.${typeId}`)
+  // 如果category是字符串，可能是中文名称或数字字符串
+  if (typeof category === 'string') {
+    // 尝试转换为数字
+    const parsedId = parseInt(category)
+    if (!isNaN(parsedId)) {
+      categoryId = parsedId
+    } else {
+      // 如果是中文名称，通过gameTypesCache查找对应的ID
+       if (gameTypesCache) {
+         const categoryInfo = gameTypesCache.find(cat => cat.name === category)
+         if (categoryInfo) {
+           categoryId = categoryInfo.id
+         }
+       }
+    }
   }
+  
+  // 使用国际化翻译
+  if (categoryId) {
+    return t(`gameTypes.${categoryId}`)
+  }
+  
   return category // 如果没有找到对应翻译，返回原始值
 }
 </script>
