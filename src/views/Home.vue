@@ -106,15 +106,10 @@ const latestGames = ref([])
 // 加载热门游戏数据
 const loadHotGames = async () => {
   try {
-    const data = await dataCacheService.loadHotGames()
-    // 为每个游戏添加额外的显示属性
-    hotGames.value = await Promise.all(data.map(async (game, index) => ({
-      ...game,
-      id: index + 1,
-      category: await getCategoryFromTags(game.tags),
-      rating: (4.0 + Math.random() * 1.0).toFixed(1), // 随机生成4.0-5.0的评分
-      plays: Math.floor(Math.random() * 50000) + 10000 // 随机生成游戏次数
-    })))
+    const data = await dataCacheService.loadAllGames()
+    // 筛选isHot为true的游戏
+    const hotGamesList = data.filter(game => game.isHot === true)
+    hotGames.value = hotGamesList
   } catch (error) {
     console.error('加载热门游戏数据失败:', error)
   }
@@ -166,12 +161,9 @@ const getCategoryFromTags = async (tags) => {
 const loadLatestGames = async () => {
   try {
     const data = await dataCacheService.loadAllGames()
-    // 取最后4个游戏作为最新游戏
-    latestGames.value = await Promise.all(data.slice(-4).map(async (game, index) => ({
-      ...game,
-      id: data.length - 4 + index + 1,
-      category: await getCategoryFromTags(game.tags)
-    })))
+    // 筛选isNew为true的游戏，取前4个
+    const newGamesList = data.filter(game => game.isNew === true).slice(0, 4)
+    latestGames.value = newGamesList
   } catch (error) {
     console.error('加载最新游戏数据失败:', error)
   }

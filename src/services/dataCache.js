@@ -4,7 +4,6 @@ class DataCacheService {
     this.cache = {
       allGames: null,
       gamesList: null,
-      hotGames: null,
       gameTypes: null
     }
     this.loadingPromises = {}
@@ -24,7 +23,6 @@ class DataCacheService {
       const promises = [
         this.loadAllGames(),
         this.loadGamesList(),
-        this.loadHotGames(),
         this.loadGameTypes()
       ]
 
@@ -71,25 +69,6 @@ class DataCacheService {
       return this.cache.gamesList
     } finally {
       delete this.loadingPromises.gamesList
-    }
-  }
-
-  // 加载热门游戏数据
-  async loadHotGames() {
-    if (this.cache.hotGames) {
-      return this.cache.hotGames
-    }
-
-    if (this.loadingPromises.hotGames) {
-      return this.loadingPromises.hotGames
-    }
-
-    this.loadingPromises.hotGames = this.fetchData('/hot-game.json')
-    try {
-      this.cache.hotGames = await this.loadingPromises.hotGames
-      return this.cache.hotGames
-    } finally {
-      delete this.loadingPromises.hotGames
     }
   }
 
@@ -148,7 +127,6 @@ class DataCacheService {
     this.cache = {
       allGames: null,
       gamesList: null,
-      hotGames: null,
       gameTypes: null
     }
     this.isInitialized = false
