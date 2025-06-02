@@ -137,6 +137,31 @@
               </div>
             </div>
           </div>
+
+          <!-- 相关链接 -->
+          <div v-if="externalLinks.length > 0" class="bg-gray-800 rounded-lg p-6">
+            <h3 class="text-xl font-game text-game-accent mb-4">{{ $t('gameDetail.relatedLinks') }}</h3>
+            <div class="space-y-3">
+              <a 
+                v-for="link in externalLinks" 
+                :key="link.id"
+                :href="link.url"
+                :rel="link.isSponsored ? 'sponsored nofollow' : 'nofollow'"
+                target="_blank"
+                class="external-link flex items-center justify-between p-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors group"
+                @click="trackLinkClick(link)"
+              >
+                <div class="flex-1">
+                  <h4 class="text-white font-medium text-sm">{{ link.title }}</h4>
+                  <p class="text-gray-400 text-xs mt-1">{{ link.description }}</p>
+                  <span class="text-blue-400 text-xs">{{ getDomain(link.url) }}</span>
+                </div>
+                <svg class="external-icon w-4 h-4 text-gray-400 group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" />
+                </svg>
+              </a>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -485,32 +510,68 @@ const copySuccess = ref(false)
 const showQRCode = ref(false)
 const qrCodeContainer = ref(null)
 
-const socials = computed(() => [
-  { 
-    name: 'weixin', 
-    icon: '🔗', 
-    label: t('gameDetail.weixin'),
-    class: 'bg-green-600 hover:bg-green-700 text-white'
-  },
-  { 
-    name: 'weibo', 
-    icon: '📱', 
-    label: t('gameDetail.weibo'),
-    class: 'bg-red-600 hover:bg-red-700 text-white'
-  },
-  { 
-    name: 'qq', 
-    icon: '💬', 
-    label: t('gameDetail.qq'),
-    class: 'bg-blue-600 hover:bg-blue-700 text-white'
-  },
-  { 
-    name: 'link', 
-    icon: '🔗', 
-    label: t('gameDetail.copyLink'),
-    class: 'bg-gray-600 hover:bg-gray-700 text-white'
+const socials = computed(() => {
+  const currentLocale = t('locale')
+  const isEnglish = currentLocale === 'en'
+  
+  if (isEnglish) {
+    // 英文版本：Twitter、Facebook、Reddit
+    return [
+      { 
+        name: 'twitter', 
+        icon: '🐦', 
+        label: t('gameDetail.twitter'),
+        class: 'bg-blue-400 hover:bg-blue-500 text-white'
+      },
+      { 
+        name: 'facebook', 
+        icon: '📘', 
+        label: t('gameDetail.facebook'),
+        class: 'bg-blue-600 hover:bg-blue-700 text-white'
+      },
+      { 
+        name: 'reddit', 
+        icon: '🔴', 
+        label: t('gameDetail.reddit'),
+        class: 'bg-orange-600 hover:bg-orange-700 text-white'
+      },
+      { 
+        name: 'link', 
+        icon: '🔗', 
+        label: t('gameDetail.copyLink'),
+        class: 'bg-gray-600 hover:bg-gray-700 text-white'
+      }
+    ]
+  } else {
+    // 中文版本：微信、微博、QQ
+    return [
+      { 
+        name: 'weixin', 
+        icon: '💬', 
+        label: t('gameDetail.weixin'),
+        class: 'bg-green-600 hover:bg-green-700 text-white'
+      },
+      { 
+        name: 'weibo', 
+        icon: '📱', 
+        label: t('gameDetail.weibo'),
+        class: 'bg-red-600 hover:bg-red-700 text-white'
+      },
+      { 
+        name: 'qq', 
+        icon: '🐧', 
+        label: t('gameDetail.qq'),
+        class: 'bg-blue-600 hover:bg-blue-700 text-white'
+      },
+      { 
+        name: 'link', 
+        icon: '🔗', 
+        label: t('gameDetail.copyLink'),
+        class: 'bg-gray-600 hover:bg-gray-700 text-white'
+      }
+    ]
   }
-])
+})
 
 // 分享URL计算属性
 const shareUrl = computed(() => {
@@ -601,6 +662,22 @@ const share = (platform) => {
       const qqUrl = `https://connect.qq.com/widget/shareqq/index.html?url=${encodeURIComponent(shareData.link)}&title=${encodeURIComponent(shareData.title)}&summary=${encodeURIComponent(shareData.desc)}`
       window.open(qqUrl, '_blank')
       break
+    case 'twitter':
+      // Twitter分享
+      const twitterText = `${shareData.title} - ${shareData.desc}`
+      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(twitterText)}&url=${encodeURIComponent(shareData.link)}`
+      window.open(twitterUrl, '_blank')
+      break
+    case 'facebook':
+      // Facebook分享
+      const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareData.link)}&quote=${encodeURIComponent(shareData.title + ' - ' + shareData.desc)}`
+      window.open(facebookUrl, '_blank')
+      break
+    case 'reddit':
+      // Reddit分享
+      const redditUrl = `https://www.reddit.com/submit?url=${encodeURIComponent(shareData.link)}&title=${encodeURIComponent(shareData.title)}`
+      window.open(redditUrl, '_blank')
+      break
     case 'link':
       copyToClipboard()
       break
@@ -657,6 +734,146 @@ const relatedGames = computed(() => {
     plays: g.plays
   }))
 })
+
+// 外链数据生成
+const externalLinks = computed(() => {
+  if (!game.value) return []
+  
+  const links = []
+  const gameTitle = game.value.title
+  const gameCategory = game.value.category
+  const currentLocale = t('locale') // 获取当前语言
+  const isEnglish = currentLocale === 'en'
+  
+  // 1. 维基百科链接（支持多语言）
+  if (gameTitle) {
+    const wikiDomain = isEnglish ? 'en.wikipedia.org' : 'zh.wikipedia.org'
+    const wikiTitle = isEnglish ? 'Wikipedia' : '维基百科'
+    const wikiDescription = isEnglish 
+      ? `View detailed information about ${gameTitle}` 
+      : `查看${gameTitle}的详细信息`
+    
+    links.push({
+      id: 'wikipedia',
+      title: wikiTitle,
+      description: wikiDescription,
+      url: `https://${wikiDomain}/wiki/${encodeURIComponent(gameTitle)}`,
+      isSponsored: false,
+      category: 'reference'
+    })
+  }
+  
+  // 2. 游戏搜索链接
+  if (gameTitle) {
+    const gameSpotTitle = isEnglish ? 'GameSpot Search' : 'GameSpot搜索'
+    const gameSpotDescription = isEnglish 
+      ? `Search for ${gameTitle} on GameSpot` 
+      : `在GameSpot上搜索${gameTitle}`
+    
+    links.push({
+      id: 'gamespot',
+      title: gameSpotTitle,
+      description: gameSpotDescription,
+      url: `https://www.gamespot.com/search/?q=${encodeURIComponent(gameTitle)}`,
+      isSponsored: false,
+      category: 'review'
+    })
+  }
+  
+  // 3. 游戏社区链接
+  if (gameTitle) {
+    const redditTitle = isEnglish ? 'Reddit Discussion' : 'Reddit讨论'
+    const redditDescription = isEnglish 
+      ? `Discuss ${gameTitle} on Reddit` 
+      : `在Reddit上讨论${gameTitle}`
+    
+    links.push({
+      id: 'reddit',
+      title: redditTitle,
+      description: redditDescription,
+      url: `https://www.reddit.com/search/?q=${encodeURIComponent(gameTitle)}`,
+      isSponsored: false,
+      category: 'community'
+    })
+  }
+  
+  // 4. 游戏类型相关链接
+  if (gameCategory) {
+    const categoryTitle = isEnglish 
+      ? `${gameCategory} Games Collection` 
+      : `${gameCategory}游戏合集`
+    const categoryDescription = isEnglish 
+      ? `Explore more ${gameCategory} games` 
+      : `探索更多${gameCategory}类型游戏`
+    
+    links.push({
+      id: 'category',
+      title: categoryTitle,
+      description: categoryDescription,
+      url: `/games?category=${encodeURIComponent(gameCategory)}`,
+      isSponsored: false,
+      category: 'internal'
+    })
+  }
+  
+  // 5. 游戏开发资源（针对特定类型）
+  const strategicCategories = isEnglish 
+    ? ['Strategy', 'RPG', 'Simulation'] 
+    : ['策略游戏', '角色扮演', '模拟游戏']
+  
+  if (gameCategory && strategicCategories.includes(gameCategory)) {
+    const unityTitle = isEnglish ? 'Unity Game Engine' : 'Unity游戏引擎'
+    const unityDescription = isEnglish 
+      ? 'Learn game development technology' 
+      : '学习游戏开发技术'
+    
+    links.push({
+      id: 'unity',
+      title: unityTitle,
+      description: unityDescription,
+      url: 'https://unity.com/',
+      isSponsored: true,
+      category: 'development'
+    })
+  }
+  
+  return links.slice(0, 5) // 最多显示5个链接
+})
+
+// 提取域名
+const getDomain = (url) => {
+  try {
+    return new URL(url).hostname
+  } catch {
+    return url
+  }
+}
+
+// 外链点击追踪
+const trackLinkClick = (link) => {
+  try {
+    // Google Analytics 事件追踪
+    if (typeof gtag !== 'undefined') {
+      gtag('event', 'external_link_click', {
+        link_url: link.url,
+        link_title: link.title,
+        link_category: link.category,
+        game_title: game.value?.title,
+        page_location: window.location.href
+      })
+    }
+    
+    // 控制台日志（开发环境）
+    console.log('外链点击:', {
+      title: link.title,
+      url: link.url,
+      category: link.category,
+      game: game.value?.title
+    })
+  } catch (error) {
+    console.error('外链点击追踪失败:', error)
+  }
+}
 
 // 游戏类型翻译函数
 const getGameTypeTranslation = (category) => {

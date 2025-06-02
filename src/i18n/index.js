@@ -2,6 +2,7 @@ import { createI18n } from 'vue-i18n'
 
 // 中文翻译
 const zh = {
+  locale: 'zh',
   nav: {
     home: '首页',
     allGames: '所有游戏',
@@ -54,6 +55,7 @@ const zh = {
     controls: '操作说明',
     shareGame: '分享游戏',
     relatedGames: '相关游戏',
+    relatedLinks: '相关链接',
     fullscreen: '全屏',
     copied: '已复制',
     copy: '复制',
@@ -64,12 +66,16 @@ const zh = {
     weixin: '微信',
     weibo: '微博',
     qq: 'QQ',
-    copyLink: '复制链接'
+    copyLink: '复制链接',
+    twitter: 'Twitter',
+    facebook: 'Facebook',
+    reddit: 'Reddit'
   }
 }
 
 // 英文翻译
 const en = {
+  locale: 'en',
   nav: {
     home: 'Home',
     allGames: 'All Games',
@@ -122,6 +128,7 @@ const en = {
     controls: 'Controls',
     shareGame: 'Share Game',
     relatedGames: 'Related Games',
+    relatedLinks: 'Related Links',
     fullscreen: 'Fullscreen',
     copied: 'Copied',
     copy: 'Copy',
@@ -132,7 +139,10 @@ const en = {
     weixin: 'WeChat',
     weibo: 'Weibo',
     qq: 'QQ',
-    copyLink: 'Copy Link'
+    copyLink: 'Copy Link',
+    twitter: 'Twitter',
+    facebook: 'Facebook',
+    reddit: 'Reddit'
   }
 }
 
