@@ -1,15 +1,7 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-    <!-- 加载状态 -->
-    <div v-if="loading || !game" class="flex items-center justify-center min-h-screen">
-      <div class="text-center">
-        <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-white mx-auto mb-4"></div>
-        <p class="text-white text-lg">{{ $t('gameDetail.loading') }}</p>
-      </div>
-    </div>
-
     <!-- 游戏内容 -->
-    <div v-else class="container mx-auto px-4 py-8">
+    <div v-if="game" class="container mx-auto px-4 py-8">
       <div class="bg-gray-800 rounded-lg overflow-hidden">
         <div class="relative">
           <img 
@@ -207,7 +199,7 @@ import { updatePageMeta, generateBreadcrumbs, updateCanonicalUrl, generateCanoni
 
 const route = useRoute()
 const router = useRouter()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const { injectGameData, injectBreadcrumbData, injectMultipleStructuredData } = useStructuredData()
 const gameIframe = ref(null)
 const allGames = ref([])
@@ -741,7 +733,7 @@ const externalLinks = computed(() => {
   
   const links = []
   const gameTitle = game.value.title
-  const gameCategory = game.value.category
+  const gameCategory = getGameTypeTranslation.value(game.value.category)
   const currentLocale = t('locale') // 获取当前语言
   const isEnglish = currentLocale === 'en'
   
@@ -875,41 +867,43 @@ const trackLinkClick = (link) => {
   }
 }
 
-// 游戏类型翻译函数
-const getGameTypeTranslation = (category) => {
-  if (!category) return ''
-  
-  let categoryId = null
-  
-  // 如果category是数字ID，直接使用
-  if (typeof category === 'number') {
-    categoryId = category
-  }
-  
-  // 如果category是字符串，可能是中文名称或数字字符串
-  if (typeof category === 'string') {
-    // 尝试转换为数字
-    const parsedId = parseInt(category)
-    if (!isNaN(parsedId)) {
-      categoryId = parsedId
-    } else {
-      // 如果是中文名称，通过gameTypesCache查找对应的ID
-       if (gameTypesCache) {
-         const categoryInfo = gameTypesCache.find(cat => cat.name === category)
-         if (categoryInfo) {
-           categoryId = categoryInfo.id
-         }
-       }
+// 游戏类型翻译函数（响应式）
+const getGameTypeTranslation = computed(() => {
+  return (category) => {
+    if (!category) return ''
+    
+    let categoryId = null
+    
+    // 如果category是数字ID，直接使用
+    if (typeof category === 'number') {
+      categoryId = category
     }
+    
+    // 如果category是字符串，可能是中文名称或数字字符串
+    if (typeof category === 'string') {
+      // 尝试转换为数字
+      const parsedId = parseInt(category)
+      if (!isNaN(parsedId)) {
+        categoryId = parsedId
+      } else {
+        // 如果是中文名称，通过gameTypesCache查找对应的ID
+         if (gameTypesCache) {
+           const categoryInfo = gameTypesCache.find(cat => cat.name === category)
+           if (categoryInfo) {
+             categoryId = categoryInfo.id
+           }
+         }
+      }
+    }
+    
+    // 使用国际化翻译，locale.value确保响应式更新
+    if (categoryId) {
+      return t(`gameTypes.${categoryId}`)
+    }
+    
+    return category // 如果没有找到对应翻译，返回原始值
   }
-  
-  // 使用国际化翻译
-  if (categoryId) {
-    return t(`gameTypes.${categoryId}`)
-  }
-  
-  return category // 如果没有找到对应翻译，返回原始值
-}
+})
 </script>
 
 <style scoped>
