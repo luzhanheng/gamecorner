@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-12">
-    <!-- 性能统计浮动按钮 -->
-    <div class="performance-toggle" @click="togglePerformanceStats" title="查看性能统计 (Ctrl+Shift+P)">
+    <!-- 性能统计浮动按钮 (默认隐藏) -->
+    <div v-show="false" class="performance-toggle" @click="togglePerformanceStats" title="查看性能统计 (Ctrl+Shift+P)">
       📊
     </div>
     
