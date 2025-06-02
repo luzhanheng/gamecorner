@@ -103,9 +103,11 @@ import { useI18n } from 'vue-i18n'
 import homeDataCacheService from '../services/homeDataCache.js'
 import dataCacheService from '../services/dataCache.js' // 保留作为备用
 import HomePerformanceStats from '../components/HomePerformanceStats.vue'
+import { useStructuredData } from '../utils/seoStructuredData.js'
 
 const router = useRouter()
 const { t, locale } = useI18n()
+const { injectWebSiteData, injectGameListData, injectMultipleStructuredData } = useStructuredData()
 
 // 热门游戏数据
 const hotGames = ref([])
@@ -213,6 +215,94 @@ const togglePerformanceStats = () => {
   }
 }
 
+// 注入首页结构化数据
+const injectHomeStructuredData = () => {
+  try {
+    const structuredDataArray = []
+    
+    // 1. 网站基础结构化数据
+    const websiteData = {
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: 'GameCorner',
+      url: window.location.origin,
+      description: locale.value === 'zh' 
+        ? 'Game Corner是您免费在线HTML5游戏的一站式目的地！我们拥有各种类型的大量游戏收藏。'
+        : 'Your one-stop destination for free online HTML5 games! We have a huge collection of games in various genres.',
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: `${window.location.origin}/games?search={search_term_string}`,
+        'query-input': 'required name=search_term_string'
+      },
+      publisher: {
+        '@type': 'Organization',
+        name: 'GameCorner',
+        url: window.location.origin
+      }
+    }
+    structuredDataArray.push(websiteData)
+    
+    // 2. 热门游戏列表结构化数据
+    if (hotGames.value && hotGames.value.length > 0) {
+      const hotGamesData = {
+        '@context': 'https://schema.org',
+        '@type': 'ItemList',
+        name: locale.value === 'zh' ? '热门游戏 - GameCorner' : 'Popular Games - GameCorner',
+        description: locale.value === 'zh' ? '最受欢迎的免费在线游戏' : 'Most popular free online games',
+        url: `${window.location.origin}/#hot-games`,
+        numberOfItems: hotGames.value.length,
+        itemListElement: hotGames.value.slice(0, 10).map((game, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          item: {
+            '@type': 'VideoGame',
+            name: game.title,
+            url: `${window.location.origin}/game/${game.id}`,
+            image: game.image,
+            description: game.description || `${game.title} - 免费在线游戏`,
+            gamePlatform: 'Web Browser',
+            genre: game.category || 'Game'
+          }
+        }))
+      }
+      structuredDataArray.push(hotGamesData)
+    }
+    
+    // 3. 最新游戏列表结构化数据
+    if (latestGames.value && latestGames.value.length > 0) {
+      const latestGamesData = {
+        '@context': 'https://schema.org',
+        '@type': 'ItemList',
+        name: locale.value === 'zh' ? '最新游戏 - GameCorner' : 'Latest Games - GameCorner',
+        description: locale.value === 'zh' ? '最新上线的免费在线游戏' : 'Latest free online games',
+        url: `${window.location.origin}/#latest-games`,
+        numberOfItems: latestGames.value.length,
+        itemListElement: latestGames.value.slice(0, 10).map((game, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          item: {
+            '@type': 'VideoGame',
+            name: game.title,
+            url: `${window.location.origin}/game/${game.id}`,
+            image: game.image,
+            description: game.description || `${game.title} - 免费在线游戏`,
+            gamePlatform: 'Web Browser',
+            genre: game.category || 'Game'
+          }
+        }))
+      }
+      structuredDataArray.push(latestGamesData)
+    }
+    
+    // 注入所有结构化数据
+    injectMultipleStructuredData(structuredDataArray)
+    console.log('✅ 首页结构化数据注入完成')
+    
+  } catch (error) {
+    console.error('❌ 结构化数据注入失败:', error)
+  }
+}
+
 // 首页SEO优化
 const updateHomePageSEO = () => {
   // 更新页面标题
@@ -300,8 +390,9 @@ onMounted(async () => {
     homeLoadTime.value = loadTime
     console.log(`✅ 首页初始化完成，耗时: ${loadTime}ms`)
     
-    // 更新SEO
+    // 更新SEO和结构化数据
     updateHomePageSEO()
+    injectHomeStructuredData()
     
     // 监听完整游戏列表加载完成事件
     window.addEventListener('fullGamesListReady', (event) => {

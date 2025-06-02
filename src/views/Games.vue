@@ -102,10 +102,12 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import dataCacheService from '../services/dataCache.js'
+import { useStructuredData } from '../utils/seoStructuredData.js'
 
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
+const { injectGameListData, injectBreadcrumbData, injectMultipleStructuredData } = useStructuredData()
 
 // 跳转到游戏详情页
 const goToGame = (gameId) => {
@@ -293,6 +295,27 @@ const currentPage = ref(1)
 const itemsPerPage = 12
 
 // 组件挂载时加载数据
+// 注入游戏列表页结构化数据
+const injectGamesStructuredData = () => {
+  const currentCategory = selectedCategory.value ? 
+    gameTypesCache.value?.find(cat => cat.id.toString() === selectedCategory.value) : null
+  
+  const structuredDataList = [
+    injectGameListData({
+      games: filteredGames.value,
+      category: currentCategory?.name || '所有游戏',
+      totalCount: allFilteredGames.value.length
+    }),
+    injectBreadcrumbData([
+      { name: '首页', url: '/' },
+      { name: '游戏列表', url: '/games' },
+      ...(currentCategory ? [{ name: currentCategory.name, url: `/games?categoryId=${currentCategory.id}` }] : [])
+    ])
+  ]
+  
+  injectMultipleStructuredData(structuredDataList)
+}
+
 onMounted(async () => {
   // 先加载游戏分类配置
   if (!gameTypesCache.value) {
@@ -307,6 +330,9 @@ onMounted(async () => {
   if (route.query.search) {
     searchQuery.value = route.query.search
   }
+  
+  // 注入结构化数据
+  injectGamesStructuredData()
 })
 
 // 监听路由变化

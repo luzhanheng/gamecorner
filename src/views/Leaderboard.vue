@@ -101,7 +101,10 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useStructuredData } from '../utils/seoStructuredData.js'
+
+const { injectLeaderboardData, injectBreadcrumbData, injectMultipleStructuredData } = useStructuredData()
 
 const periods = [
   { label: '今日', value: 'daily' },
@@ -188,6 +191,28 @@ const filteredLeaderboard = computed(() => {
 const totalPages = computed(() => 
   Math.ceil(filteredLeaderboard.value.length / itemsPerPage)
 )
+
+// 注入排行榜页结构化数据
+const injectLeaderboardStructuredData = () => {
+  const structuredDataList = [
+    injectLeaderboardData({
+      leaderboard: filteredLeaderboard.value.slice(0, 10), // 取前10名
+      period: selectedPeriod.value,
+      game: selectedGame.value ? games.find(g => g.id === selectedGame.value) : null
+    }),
+    injectBreadcrumbData([
+      { name: '首页', url: '/' },
+      { name: '排行榜', url: '/leaderboard' }
+    ])
+  ]
+  
+  injectMultipleStructuredData(structuredDataList)
+}
+
+onMounted(() => {
+  // 注入结构化数据
+  injectLeaderboardStructuredData()
+})
 
 const formatDate = (dateString) => {
   const date = new Date(dateString)
