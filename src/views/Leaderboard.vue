@@ -103,6 +103,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useStructuredData } from '../utils/seoStructuredData.js'
+import { updatePageMeta, updateCanonicalUrl, generateCanonicalUrl } from '../utils/urlOptimizer.js'
 
 const { injectLeaderboardData, injectBreadcrumbData, injectMultipleStructuredData } = useStructuredData()
 
@@ -212,7 +213,30 @@ const injectLeaderboardStructuredData = () => {
 onMounted(() => {
   // 注入结构化数据
   injectLeaderboardStructuredData()
+  
+  // 更新页面meta信息
+  updateLeaderboardPageMeta()
 })
+
+// 更新排行榜页面meta信息
+const updateLeaderboardPageMeta = () => {
+  try {
+    // 更新页面标题和meta标签
+    updatePageMeta({ name: 'Leaderboard', meta: {
+      title: '排行榜 - GameCorner',
+      description: '查看游戏高分排行榜，挑战最高分记录',
+      keywords: '游戏排行榜,高分榜,游戏竞技'
+    }})
+    
+    // 更新canonical URL
+    const canonicalUrl = generateCanonicalUrl('/leaderboard')
+    updateCanonicalUrl(canonicalUrl)
+    
+    console.log('✅ 排行榜页面meta信息更新完成')
+  } catch (error) {
+    console.error('❌ 排行榜页面meta信息更新失败:', error)
+  }
+}
 
 const formatDate = (dateString) => {
   const date = new Date(dateString)

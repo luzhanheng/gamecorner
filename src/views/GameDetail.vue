@@ -178,6 +178,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import dataCacheService from '../services/dataCache.js'
 import { useStructuredData } from '../utils/seoStructuredData.js'
+import { updatePageMeta, generateBreadcrumbs, updateCanonicalUrl, generateCanonicalUrl, extractGameIdFromUrl } from '../utils/urlOptimizer.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -286,14 +287,18 @@ const getCategoryFromTags = async (tags) => {
 // 根据路由参数更新当前游戏
 const updateCurrentGame = () => {
   if (allGames.value.length > 0) {
-    const gameId = parseInt(route.params.id)
+    // 使用extractGameIdFromUrl函数正确提取游戏ID，支持SEO友好URL
+    const gameIdStr = extractGameIdFromUrl(route.path) || route.params.id
+    const gameId = parseInt(gameIdStr)
     game.value = allGames.value.find(g => g.id === gameId)
   }
 }
 
 // 快速加载当前游戏（优化首次加载）
 const loadCurrentGameFast = async () => {
-  const gameId = parseInt(route.params.id)
+  // 使用extractGameIdFromUrl函数正确提取游戏ID，支持SEO友好URL
+  const gameIdStr = extractGameIdFromUrl(route.path) || route.params.id
+  const gameId = parseInt(gameIdStr)
   
   // 如果有缓存，直接使用
   if (gamesCache) {
@@ -326,6 +331,9 @@ const loadCurrentGameFast = async () => {
       
       loading.value = false
       
+      // 更新页面meta信息和URL优化
+      updateGamePageMeta()
+      
       // 注入结构化数据
       setTimeout(() => {
         injectGameStructuredData()
@@ -342,6 +350,24 @@ const loadCurrentGameFast = async () => {
     console.error('快速加载游戏失败:', error)
     // 回退到完整加载
     loadAllGames()
+  }
+}
+
+// 更新游戏页面meta信息
+const updateGamePageMeta = () => {
+  if (!game.value) return
+  
+  try {
+    // 更新页面标题和meta标签
+    updatePageMeta(route, { game: game.value })
+    
+    // 更新canonical URL
+    const canonicalUrl = generateCanonicalUrl(route.path)
+    updateCanonicalUrl(canonicalUrl)
+    
+    console.log('✅ 游戏页面meta信息更新完成')
+  } catch (error) {
+    console.error('❌ 游戏页面meta信息更新失败:', error)
   }
 }
 
@@ -447,10 +473,8 @@ onMounted(() => {
 })
 
 // 监听路由变化，当游戏ID改变时更新当前游戏
-watch(() => route.params.id, () => {
-  if (gamesCache) {
-    updateCurrentGame()
-  } else {
+watch(() => route.path, () => {
+  if (route.name === 'GameDetail' || route.name === 'GameDetailWithSlug') {
     loadCurrentGameFast()
   }
 }, { immediate: false })
@@ -606,7 +630,9 @@ const toggleFullscreen = () => {
 const relatedGames = computed(() => {
   if (!game.value || !allGames.value.length) return []
   
-  const currentGameId = parseInt(route.params.id)
+  // 使用extractGameIdFromUrl函数正确提取游戏ID，支持SEO友好URL
+  const gameIdStr = extractGameIdFromUrl(route.path) || route.params.id
+  const currentGameId = parseInt(gameIdStr)
   const currentCategory = game.value.category
   
   // 获取除当前游戏外的所有游戏

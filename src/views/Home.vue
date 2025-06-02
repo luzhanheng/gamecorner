@@ -44,9 +44,9 @@
               <h3 class="game-title">{{ game.title }}</h3>
               <span class="text-sm text-gray-400">{{ $t(`gameTypes.${game.category}`) }}</span>
             </div>
-            <router-link :to="`/game/${game.id}`" class="btn-primary block text-center">
+            <button @click="goToGame(game.id)" class="btn-primary block text-center w-full">
               {{ $t('home.playNow') }}
-            </router-link>
+            </button>
           </div>
         </div>
       </div>
@@ -104,6 +104,7 @@ import homeDataCacheService from '../services/homeDataCache.js'
 import dataCacheService from '../services/dataCache.js' // 保留作为备用
 import HomePerformanceStats from '../components/HomePerformanceStats.vue'
 import { useStructuredData } from '../utils/seoStructuredData.js'
+import { generateGameUrl, updatePageMeta, updateCanonicalUrl, generateCanonicalUrl } from '../utils/urlOptimizer.js'
 
 const router = useRouter()
 const { t, locale } = useI18n()
@@ -205,13 +206,42 @@ const goToCategory = (categoryId) => {
 
 // 跳转到游戏详情页面
 const goToGame = (gameId) => {
-  router.push(`/game/${gameId}`)
+  // 查找游戏数据以生成SEO友好的URL
+  const game = [...(hotGames.value || []), ...(latestGames.value || [])]
+    .find(g => g.id.toString() === gameId.toString())
+  
+  if (game) {
+    const seoUrl = generateGameUrl(game)
+    router.push(seoUrl)
+  } else {
+    router.push(`/game/${gameId}`)
+  }
 }
 
 // 性能统计方法
 const togglePerformanceStats = () => {
   if (performanceStatsRef.value) {
     performanceStatsRef.value.toggle()
+  }
+}
+
+// 更新首页meta信息
+const updateHomePageMeta = () => {
+  try {
+    // 更新页面标题和meta标签
+    updatePageMeta({ name: 'Home', meta: {
+      title: 'GameCorner - 免费在线游戏平台',
+      description: '发现最新最热门的免费在线游戏，包含动作、冒险、益智、休闲等多种类型游戏',
+      keywords: '免费游戏,在线游戏,网页游戏,休闲游戏,动作游戏'
+    }})
+    
+    // 更新canonical URL
+    const canonicalUrl = generateCanonicalUrl('/')
+    updateCanonicalUrl(canonicalUrl)
+    
+    console.log('✅ 首页meta信息更新完成')
+  } catch (error) {
+    console.error('❌ 首页meta信息更新失败:', error)
   }
 }
 
@@ -393,6 +423,9 @@ onMounted(async () => {
     // 更新SEO和结构化数据
     updateHomePageSEO()
     injectHomeStructuredData()
+    
+    // 更新首页URL优化
+    updateHomePageMeta()
     
     // 监听完整游戏列表加载完成事件
     window.addEventListener('fullGamesListReady', (event) => {

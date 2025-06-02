@@ -93,6 +93,12 @@ export function generateGameStructuredData(game) {
  * @param {string} pageUrl - 页面URL
  */
 export function generateGameListStructuredData(games, category = '全部游戏', pageUrl = '') {
+  // 确保games是数组类型
+  if (!Array.isArray(games)) {
+    console.warn('generateGameListStructuredData: games参数不是数组类型', games)
+    return null
+  }
+  
   const itemListElement = games.slice(0, 20).map((game, index) => ({
     '@type': 'ListItem',
     position: index + 1,

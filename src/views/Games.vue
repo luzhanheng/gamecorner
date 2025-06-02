@@ -70,9 +70,9 @@
               <span class="text-sm text-gray-400">·</span>
               <span class="text-sm text-gray-400">{{ game.date }}</span>
             </div>
-            <router-link :to="`/game/${game.id}`" class="btn-primary text-sm">
+            <button @click="goToGame(game.id)" class="btn-primary text-sm">
               {{ $t('home.playNow') }}
-            </router-link>
+            </button>
           </div>
         </div>
       </div>
@@ -103,6 +103,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import dataCacheService from '../services/dataCache.js'
 import { useStructuredData } from '../utils/seoStructuredData.js'
+import { generateGameUrl, updatePageMeta, generateBreadcrumbs } from '../utils/urlOptimizer.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -111,7 +112,14 @@ const { injectGameListData, injectBreadcrumbData, injectMultipleStructuredData }
 
 // 跳转到游戏详情页
 const goToGame = (gameId) => {
-  router.push(`/game/${gameId}`)
+  // 查找游戏数据以生成SEO友好的URL
+  const game = games.value?.find(g => g.id.toString() === gameId.toString())
+  if (game) {
+    const seoUrl = generateGameUrl(game)
+    router.push(seoUrl)
+  } else {
+    router.push(`/game/${gameId}`)
+  }
 }
 
 // 更新分类URL
@@ -301,11 +309,11 @@ const injectGamesStructuredData = () => {
     gameTypesCache.value?.find(cat => cat.id.toString() === selectedCategory.value) : null
   
   const structuredDataList = [
-    injectGameListData({
-      games: filteredGames.value,
-      category: currentCategory?.name || '所有游戏',
-      totalCount: allFilteredGames.value.length
-    }),
+    injectGameListData(
+      filteredGames.value,
+      currentCategory?.name || '所有游戏',
+      window.location.href
+    ),
     injectBreadcrumbData([
       { name: '首页', url: '/' },
       { name: '游戏列表', url: '/games' },
@@ -333,7 +341,20 @@ onMounted(async () => {
   
   // 注入结构化数据
   injectGamesStructuredData()
+  
+  // 更新页面meta信息
+  updatePageMetaInfo()
 })
+
+// 更新页面meta信息
+const updatePageMetaInfo = () => {
+  const currentCategory = selectedCategory.value ? 
+    gameTypesCache.value?.find(cat => cat.id.toString() === selectedCategory.value) : null
+  
+  updatePageMeta(route, {
+    category: currentCategory
+  })
+}
 
 // 监听路由变化
 watch(() => route.query, (newQuery) => {
