@@ -33,17 +33,17 @@
       <h2 class="text-2xl font-game text-game-secondary mb-6">{{ $t('home.hotGames') }}</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div v-for="game in hotGames" :key="game.id" class="game-card">
-          <img :src="game.image" :alt="game.title" class="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity" @click="goToGame(game.id)">
-          <div class="p-4">
-            <h3 class="game-title">{{ game.title }}</h3>
-            <div class="flex items-center justify-between text-sm text-gray-400 mb-2">
-              <span>{{ $t(`gameTypes.${game.category}`) }}</span>
-              <div class="flex items-center">
-                <span class="text-game-accent">★</span>
-                <span class="ml-1">4.5</span>
-              </div>
+          <div class="relative overflow-hidden">
+            <img :src="game.image" :alt="game.title" class="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity" @click="goToGame(game.id)">
+            <div class="absolute top-2 right-2 bg-game-accent px-2 py-1 rounded text-sm text-white">
+              ★ 4.5
             </div>
-            <p class="text-gray-500 text-sm mb-4">{{ game.plays }} {{ $t('games.plays') }}</p>
+          </div>
+          <div class="p-4">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="game-title">{{ game.title }}</h3>
+              <span class="text-sm text-gray-400">{{ $t(`gameTypes.${game.category}`) }}</span>
+            </div>
             <router-link :to="`/game/${game.id}`" class="btn-primary block text-center">
               {{ $t('home.playNow') }}
             </router-link>
