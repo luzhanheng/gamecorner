@@ -36,7 +36,7 @@
           <div class="relative overflow-hidden">
             <img v-lazy-load="game.image" :alt="game.title" class="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity" @click="goToGame(game.id)" loading="lazy">
             <div class="absolute top-2 right-2 bg-game-accent px-2 py-1 rounded text-sm text-white">
-              ★ 4.5
+              ★ {{ game.rating }}
             </div>
           </div>
           <div class="p-4">
