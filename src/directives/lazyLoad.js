@@ -1,54 +1,60 @@
-// 图片懒加载指令
-const lazyLoad = {
+import { optimizeImageUrl, calculateOptimalSize, createLazyLoadObserver } from '../utils/imageOptimizer.js';
+
+// 懒加载指令
+export const lazyLoad = {
   mounted(el, binding) {
-    const imageObserver = new IntersectionObserver((entries, observer) => {
+    // 创建简单的观察器
+    const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          const img = entry.target
-          const src = binding.value || img.dataset.src
+          const img = entry.target;
+          const originalSrc = binding.value;
           
-          if (src) {
-            // 创建新的图片对象预加载
-            const newImg = new Image()
-            
-            newImg.onload = () => {
-              img.src = src
-              img.classList.remove('lazy-loading')
-              img.classList.add('lazy-loaded')
-            }
-            
-            newImg.onerror = () => {
-              img.classList.remove('lazy-loading')
-              img.classList.add('lazy-error')
-              // 设置默认图片
-              img.src = '/images/game-placeholder.svg'
-            }
-            
-            newImg.src = src
-          }
+          // 直接使用原始URL，不进行优化
+          const imageLoader = new Image();
           
-          observer.unobserve(img)
+          imageLoader.onload = () => {
+            img.src = originalSrc;
+            img.classList.add('loaded');
+            img.classList.remove('loading');
+            img.style.opacity = '1';
+            img.style.transform = 'scale(1)';
+          };
+          
+          imageLoader.onerror = () => {
+            img.src = '/images/game-placeholder.svg';
+            img.classList.add('error');
+            img.classList.remove('loading');
+            img.style.opacity = '1';
+            img.style.transform = 'scale(1)';
+          };
+          
+          imageLoader.src = originalSrc;
+          observer.unobserve(img);
         }
-      })
+      });
     }, {
-      rootMargin: '50px 0px', // 提前50px开始加载
+      rootMargin: '100px',
       threshold: 0.1
-    })
+    });
     
-    // 添加加载中的样式
-    el.classList.add('lazy-loading')
-    imageObserver.observe(el)
+    // 初始化样式
+    el.classList.add('loading');
+    el.src = '/images/game-placeholder.svg';
+    el.style.opacity = '0.7';
+    el.style.transform = 'scale(0.95)';
+    el.style.transition = 'all 0.5s ease-in-out';
     
-    // 保存observer到元素上，用于清理
-    el._imageObserver = imageObserver
+    // 开始观察
+    observer.observe(el);
+    
+    // 保存引用
+    el._observer = observer;
   },
   
   unmounted(el) {
-    if (el._imageObserver) {
-      el._imageObserver.disconnect()
-      delete el._imageObserver
+    if (el._observer) {
+      el._observer.disconnect();
     }
   }
-}
-
-export default lazyLoad
+};

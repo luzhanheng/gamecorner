@@ -48,10 +48,11 @@
       >
         <div class="relative overflow-hidden">
           <img 
-            :src="game.image" 
+            v-lazy-load="game.image" 
             :alt="game.title" 
             class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
             @click="goToGame(game.id)"
+            loading="lazy"
           >
           <div class="absolute top-2 right-2 bg-game-accent px-2 py-1 rounded text-sm">
             {{ game.rating }}/5

@@ -34,7 +34,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div v-for="game in hotGames" :key="game.id" class="game-card">
           <div class="relative overflow-hidden">
-            <img :src="game.image" :alt="game.title" class="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity" @click="goToGame(game.id)">
+            <img v-lazy-load="game.image" :alt="game.title" class="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity" @click="goToGame(game.id)" loading="lazy">
             <div class="absolute top-2 right-2 bg-game-accent px-2 py-1 rounded text-sm text-white">
               ★ 4.5
             </div>
@@ -61,7 +61,7 @@
           <div v-for="game in latestGames" :key="game.id" 
                class="bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition-colors cursor-pointer"
                @click="goToGame(game.id)">
-            <img :src="game.image" :alt="game.title" class="w-full h-24 object-cover rounded mb-3">
+            <img v-lazy-load="game.image" :alt="game.title" class="w-full h-24 object-cover rounded mb-3" loading="lazy">
             <h4 class="text-sm font-game text-game-accent mb-1">{{ game.title }}</h4>
             <p class="text-xs text-gray-400">{{ $t(`gameTypes.${game.category}`) }}</p>
           </div>

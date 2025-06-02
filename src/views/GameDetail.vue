@@ -13,9 +13,10 @@
       <div class="bg-gray-800 rounded-lg overflow-hidden">
         <div class="relative">
           <img 
-            :src="game.image" 
+            v-lazy-load="game.image" 
             :alt="game.title"
             class="w-full h-64 object-cover"
+            loading="lazy"
           >
           <div class="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div>
           <div class="absolute bottom-0 left-0 p-6">

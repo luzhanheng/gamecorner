@@ -26,24 +26,55 @@
   }
   
   /* 懒加载图片样式 */
-  .lazy-loading {
+  .loading {
     @apply bg-gray-700 animate-pulse;
     background-image: url('/images/game-placeholder.svg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    filter: blur(1px);
+    transition: all 0.3s ease-in-out;
   }
   
-  .lazy-loaded {
-    @apply transition-opacity duration-300;
+  .loaded {
+    @apply transition-all duration-500 ease-in-out;
     opacity: 1;
+    filter: none;
+    transform: scale(1);
   }
   
-  .lazy-error {
+  .error {
     @apply bg-gray-600;
     background-image: url('/images/game-placeholder.svg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    filter: none;
+  }
+  
+  /* 图片优化样式 */
+  img {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    will-change: opacity, transform;
+  }
+  
+  /* 响应式图片优化 */
+  @media (max-width: 768px) {
+    img {
+      image-rendering: auto;
+    }
+  }
+  
+  /* 图片加载动画 */
+  @keyframes imageLoad {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
   }
 }

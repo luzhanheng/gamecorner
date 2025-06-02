@@ -61,9 +61,10 @@
           </div>
           <div class="col-span-3 flex items-center space-x-3">
             <img 
-              :src="record.playerAvatar" 
+              v-lazy-load="record.playerAvatar" 
               :alt="record.playerName"
               class="w-10 h-10 rounded-full"
+              loading="lazy"
             >
             <span>{{ record.playerName }}</span>
           </div>
