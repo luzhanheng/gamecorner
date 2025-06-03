@@ -102,6 +102,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import dataCacheService from '../services/dataCache.js'
+import analyticsService from '../services/analytics.js'
 import { useStructuredData } from '../utils/seoStructuredData.js'
 import { generateGameUrl, updatePageMeta, generateBreadcrumbs } from '../utils/urlOptimizer.js'
 
@@ -114,10 +115,14 @@ const { injectGameListData, injectBreadcrumbData, injectMultipleStructuredData }
 const goToGame = (gameId) => {
   // 查找游戏数据以生成SEO友好的URL
   const game = games.value?.find(g => g.id.toString() === gameId.toString())
+  
+  // 记录游戏点击统计
   if (game) {
+    analyticsService.trackGameClick(game.id, game.title, game.category)
     const seoUrl = generateGameUrl(game)
     router.push(seoUrl)
   } else {
+    analyticsService.trackGameClick(gameId, 'Unknown Game', 'Unknown')
     router.push(`/game/${gameId}`)
   }
 }

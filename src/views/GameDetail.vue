@@ -194,6 +194,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import dataCacheService from '../services/dataCache.js'
+import analyticsService from '../services/analytics.js'
 import { useStructuredData } from '../utils/seoStructuredData.js'
 import { updatePageMeta, generateBreadcrumbs, updateCanonicalUrl, generateCanonicalUrl, extractGameIdFromUrl } from '../utils/urlOptimizer.js'
 
@@ -212,6 +213,16 @@ let gameTypesCache = null
 
 // 跳转到游戏详情页
 const goToGame = (gameId) => {
+  // 查找游戏数据以记录统计
+  const targetGame = allGames.value?.find(g => g.id.toString() === gameId.toString())
+  
+  // 记录游戏点击统计
+  if (targetGame) {
+    analyticsService.trackGameClick(targetGame.id, targetGame.title, targetGame.category)
+  } else {
+    analyticsService.trackGameClick(gameId, 'Unknown Game', 'Unknown')
+  }
+  
   router.push(`/game/${gameId}`)
 }
 

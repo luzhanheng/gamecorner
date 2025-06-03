@@ -1,12 +1,12 @@
 <template>
   <div class="space-y-12">
-    <!-- 性能统计浮动按钮 (默认隐藏) -->
-    <div v-show="false" class="performance-toggle" @click="togglePerformanceStats" title="查看性能统计 (Ctrl+Shift+P)">
-      📊
-    </div>
-    
-    <!-- 性能统计组件 -->
-    <HomePerformanceStats ref="performanceStatsRef" :load-time="homeLoadTime" />
+    <!-- 性能统计浮动按钮 (仅开发环境显示) -->
+<div v-if="isDev && false" class="performance-toggle" @click="togglePerformanceStats" title="查看性能统计 (Ctrl+Shift+P)">
+  📊
+</div>
+
+<!-- 性能统计组件 (仅开发环境) -->
+<HomePerformanceStats v-if="isDev" ref="performanceStatsRef" :load-time="homeLoadTime" />
     <!-- 英雄区域 -->
     <section class="py-8 bg-gray-800 rounded-xl">
       <div class="text-center px-6">
@@ -97,17 +97,21 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import homeDataCacheService from '../services/homeDataCache.js'
 import dataCacheService from '../services/dataCache.js' // 保留作为备用
+import analyticsService from '../services/analytics.js'
 import HomePerformanceStats from '../components/HomePerformanceStats.vue'
 import { useStructuredData } from '../utils/seoStructuredData.js'
 import { generateGameUrl, updatePageMeta, updateCanonicalUrl, generateCanonicalUrl } from '../utils/urlOptimizer.js'
 
 const router = useRouter()
 const { t, locale } = useI18n()
+
+// 环境变量检测
+const isDev = import.meta.env.DEV
 const { injectWebSiteData, injectGameListData, injectMultipleStructuredData } = useStructuredData()
 
 // 热门游戏数据
@@ -210,17 +214,20 @@ const goToGame = (gameId) => {
   const game = [...(hotGames.value || []), ...(latestGames.value || [])]
     .find(g => g.id.toString() === gameId.toString())
   
+  // 记录游戏点击统计
   if (game) {
+    analyticsService.trackGameClick(game.id, game.title, game.category)
     const seoUrl = generateGameUrl(game)
     router.push(seoUrl)
   } else {
+    analyticsService.trackGameClick(gameId, 'Unknown Game', 'Unknown')
     router.push(`/game/${gameId}`)
   }
 }
 
-// 性能统计方法
+// 性能统计方法 (仅开发环境)
 const togglePerformanceStats = () => {
-  if (performanceStatsRef.value) {
+  if (isDev && performanceStatsRef.value) {
     performanceStatsRef.value.toggle()
   }
 }
@@ -397,8 +404,20 @@ watch(hotGames, () => {
   }
 })
 
+// Ctrl + Shift + P 显示/隐藏性能统计 (仅开发环境)
+const handleKeydown = (event) => {
+  if (isDev && event.ctrlKey && event.shiftKey && event.key === 'P') {
+    event.preventDefault()
+    togglePerformanceStats()
+  }
+}
+
 // 组件挂载时加载数据（使用优化后的首页服务）
 onMounted(async () => {
+  // 添加键盘事件监听 (仅开发环境)
+  if (isDev) {
+    document.addEventListener('keydown', handleKeydown)
+  }
   try {
     console.log('🏠 首页开始初始化...')
     const startTime = performance.now()
@@ -439,6 +458,13 @@ onMounted(async () => {
     loadHotGames()
     loadLatestGames()
     updateHomePageSEO()
+  }
+})
+
+// 组件卸载时清理事件监听器
+onUnmounted(() => {
+  if (isDev) {
+    document.removeEventListener('keydown', handleKeydown)
   }
 })
 </script>

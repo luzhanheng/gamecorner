@@ -43,6 +43,19 @@ const routes = [
     }
   },
   {
+    path: '/analytics',
+    name: 'Analytics',
+    component: () => import('../views/Analytics.vue'),
+    beforeEnter: (to, from, next) => {
+      // 仅开发环境可访问
+      if (import.meta.env.DEV) {
+        next()
+      } else {
+        next('/') // 生产环境重定向到首页
+      }
+    }
+  },
+  {
     path: '/game/:id/:slug?',
     name: 'GameDetail',
     component: () => import('../views/GameDetail.vue'),

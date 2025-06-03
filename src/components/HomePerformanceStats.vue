@@ -170,10 +170,13 @@ const refreshStats = () => {
   }
 }
 
-// 键盘快捷键
+// 环境变量检测
+const isDev = import.meta.env.DEV
+
+// 键盘快捷键 (仅开发环境)
 const handleKeyPress = (event) => {
   // Ctrl + Shift + P 显示/隐藏性能统计
-  if (event.ctrlKey && event.shiftKey && event.key === 'P') {
+  if (isDev && event.ctrlKey && event.shiftKey && event.key === 'P') {
     event.preventDefault()
     toggleStats()
   }
@@ -186,17 +189,19 @@ const handleFullGamesListReady = () => {
 
 // 生命周期
 onMounted(() => {
-  document.addEventListener('keydown', handleKeyPress)
-  window.addEventListener('fullGamesListReady', handleFullGamesListReady)
-  
-  // 定期更新统计
-  const interval = setInterval(refreshStats, 2000)
-  
-  onUnmounted(() => {
-    document.removeEventListener('keydown', handleKeyPress)
-    window.removeEventListener('fullGamesListReady', handleFullGamesListReady)
-    clearInterval(interval)
-  })
+  if (isDev) {
+    document.addEventListener('keydown', handleKeyPress)
+    window.addEventListener('fullGamesListReady', handleFullGamesListReady)
+    
+    // 定期更新统计
+    const interval = setInterval(refreshStats, 2000)
+    
+    onUnmounted(() => {
+      document.removeEventListener('keydown', handleKeyPress)
+      window.removeEventListener('fullGamesListReady', handleFullGamesListReady)
+      clearInterval(interval)
+    })
+  }
 })
 
 // 暴露方法给父组件

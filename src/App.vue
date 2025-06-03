@@ -40,7 +40,8 @@
           </div>
           
           <router-link to="/games" class="btn-primary whitespace-nowrap">{{ $t('nav.allGames') }}</router-link>
-           
+          <!-- <router-link to="/analytics" class="btn-primary whitespace-nowrap">访问统计</router-link>-->
+
            <!-- 语言切换按钮 -->
            <button 
              @click="toggleLanguage" 
