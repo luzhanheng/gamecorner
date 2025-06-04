@@ -38,24 +38,6 @@ function getCategoryFromTags(tags, gameTypes) {
   return bestMatch.categoryId
 }
 
-// 生成随机评分
-function generateRating() {
-  return (4.0 + Math.random() * 1.0).toFixed(1)
-}
-
-// 生成随机游玩次数
-function generatePlays() {
-  return Math.floor(Math.random() * 50000) + 10000
-}
-
-// 生成随机日期
-function generateDate() {
-  const start = new Date('2023-01-01')
-  const end = new Date('2024-12-31')
-  const randomTime = start.getTime() + Math.random() * (end.getTime() - start.getTime())
-  return new Date(randomTime).toISOString().split('T')[0]
-}
-
 /**
  * 主函数
  */

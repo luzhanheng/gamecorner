@@ -59,6 +59,17 @@
             <div class="p-6">
               <h2 class="text-2xl font-game text-game-accent mb-4">{{ $t('gameDetail.gameDescription') }}</h2>
               <p class="text-gray-300">{{ game.description }}</p>
+              
+              <!-- 游戏玩法说明 -->
+              <div v-if="game.howToPlay || game.howToPlayText" class="mt-6">
+                <h3 class="text-xl font-game text-game-accent mb-4">{{ $t('gameDetail.howToPlay') }}</h3>
+                <div class="text-gray-300">
+                  <!-- 优先使用HTML格式的howToPlay -->
+                  <div v-if="game.howToPlay" v-html="game.howToPlay" class="controls-content"></div>
+                  <!-- 如果没有HTML格式，使用纯文本格式 -->
+                  <div v-else-if="game.howToPlayText" class="whitespace-pre-line">{{ game.howToPlayText }}</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -75,6 +86,8 @@
               <div v-else-if="game.controls_text" class="whitespace-pre-line">{{ game.controls_text }}</div>
             </div>
           </div>
+
+
 
 
 
