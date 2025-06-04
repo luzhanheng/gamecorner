@@ -632,7 +632,7 @@
     "rating": "4.8",
     "plays": 18570,
     "date": "2024-03-21",
-    "isHot": true,
+    "isHot": false,
     "isNew": false
   },
   {
@@ -797,11 +797,11 @@
     "image": "https://www.onlinegames.io/media/posts/942/responsive/Monster-survivors-xs.jpg",
     "category": 2,
     "description": "Monster Survivors is an free online survival game with a minimalistic design and roguelite elements.  The monsters are here, and you must survive!   Aggressive crabs, eerie pumpkins, flesh-eating plants and yes, even evil bees!   But on a vast open land, there's no place to run or hide.",
-    "rating": "4.3",
+    "rating": "4.9",
     "plays": 45331,
     "date": "2024-09-04",
-    "isHot": false,
-    "isNew": false
+    "isHot": true,
+    "isNew": true
   },
   {
     "id": 68,
@@ -2673,6 +2673,18 @@
     "plays": 93453,
     "date": "2023-09-08",
     "isHot": false,
+    "isNew": false
+  },
+  {
+    "id": 224,
+    "title": "Totemia: Cursed Marbles",
+    "image": "https://img.cdn.famobi.com/portal/html5games/images/tmp/180/OmNomRunTeaser.jpg?v=0.2-335e9d61",
+    "category": 4,
+    "description": "Run alongside Om Nom in his famous adventure, now finally in immersive and full-responsive HTML5. Try to run as far as possible by avoiding the dangerous obstacles and enemies, collect all coins and transform Om Nom into the fastest runner possible. Use the power-ups as smart as possible to explore the beautiful world with all it's beautiful areas, but be aware of the dangers that lurk inside of them. Are you ready to explore the world of Om Nom Run and reach the highest of highscores?",
+    "rating": "4.8",
+    "plays": 93453,
+    "date": "2023-09-08",
+    "isHot": true,
     "isNew": false
   }
 ]
