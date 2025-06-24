@@ -8,7 +8,7 @@
     "rating": "4.8",
     "plays": 43475,
     "date": "2024-12-27",
-    "isHot": true,
+    "isHot": false,
     "isNew": false
   },
   {
@@ -20,7 +20,7 @@
     "rating": "5.0",
     "plays": 58422,
     "date": "2023-12-05",
-    "isHot": true,
+    "isHot": false,
     "isNew": false
   },
   {
@@ -32,7 +32,7 @@
     "rating": "5.0",
     "plays": 91665,
     "date": "2024-08-28",
-    "isHot": true,
+    "isHot": false,
     "isNew": false
   },
   {
@@ -44,7 +44,7 @@
     "rating": "5.0",
     "plays": 93252,
     "date": "2024-03-05",
-    "isHot": true,
+    "isHot": false,
     "isNew": false
   },
   {
@@ -56,7 +56,7 @@
     "rating": "5.0",
     "plays": 74863,
     "date": "2023-10-17",
-    "isHot": true,
+    "isHot": false,
     "isNew": false
   },
   {
@@ -68,7 +68,7 @@
     "rating": "4.8",
     "plays": 15167,
     "date": "2022-07-29",
-    "isHot": false,
+    "isHot": true,
     "isNew": false
   },
   {
@@ -92,7 +92,7 @@
     "rating": "4.0",
     "plays": 71300,
     "date": "2024-12-30",
-    "isHot": false,
+    "isHot": true,
     "isNew": true
   },
   {
@@ -104,7 +104,7 @@
     "rating": "5.0",
     "plays": 81015,
     "date": "2023-05-19",
-    "isHot": true,
+    "isHot": false,
     "isNew": false
   },
   {
@@ -137,10 +137,10 @@
     "image": "https://www.onlinegames.io/media/posts/310/responsive/Masked-Special-Forces-FPS-xs.jpg",
     "category": 2,
     "description": "Masked Special Forces is a multiplayer first-person shooter game with a myriad of customization options.  The game puts you in the shoes of a commander in the battle arena.  As a talented warrior, team up, strategize, and take down the opponents one by one.  \nAccess to an array of upgradable weapons, armory, kill messages, and victory dances on the main menu.",
-    "rating": "4.0",
+    "rating": "4.9",
     "plays": 89382,
     "date": "2022-08-05",
-    "isHot": false,
+    "isHot": true,
     "isNew": false
   },
   {
@@ -176,7 +176,7 @@
     "rating": "4.7",
     "plays": 92024,
     "date": "2024-01-23",
-    "isHot": false,
+    "isHot": true,
     "isNew": false
   },
   {
@@ -200,7 +200,7 @@
     "rating": "4.9",
     "plays": 75507,
     "date": "2022-04-10",
-    "isHot": false,
+    "isHot": true,
     "isNew": false
   },
   {
@@ -233,10 +233,10 @@
     "image": "https://www.onlinegames.io/media/posts/992/responsive/Five-Nights-at-Poppy-xs.jpg",
     "category": 3,
     "description": "Ever stayed late at school or walked through a dark hallway alone and felt like something was watching you?  Did you just hear the footsteps?  Is it the wind or someone whistling?  Now imagine that same creep, but at an abandoned mental hospital where animatronic Poppy from FNAF stays in.",
-    "rating": "4.3",
+    "rating": "4.8",
     "plays": 5808,
     "date": "2024-03-08",
-    "isHot": false,
+    "isHot": true,
     "isNew": false
   },
   {
@@ -284,7 +284,7 @@
     "rating": "4.6",
     "plays": 53788,
     "date": "2024-03-29",
-    "isHot": false,
+    "isHot": true,
     "isNew": false
   },
   {
@@ -332,7 +332,7 @@
     "rating": "4.1",
     "plays": 15099,
     "date": "2022-07-14",
-    "isHot": false,
+    "isHot": true,
     "isNew": false
   },
   {
@@ -368,7 +368,7 @@
     "rating": "4.8",
     "plays": 21641,
     "date": "2024-06-12",
-    "isHot": false,
+    "isHot": true,
     "isNew": false
   },
   {
@@ -776,7 +776,7 @@
     "rating": "4.9",
     "plays": 27064,
     "date": "2022-09-21",
-    "isHot": true,
+    "isHot": false,
     "isNew": false
   },
   {
@@ -800,7 +800,7 @@
     "rating": "4.9",
     "plays": 45331,
     "date": "2024-09-04",
-    "isHot": true,
+    "isHot": false,
     "isNew": true
   },
   {
@@ -1304,7 +1304,7 @@
     "rating": "5.0",
     "plays": 7215,
     "date": "2022-12-04",
-    "isHot": true,
+    "isHot": false,
     "isNew": false
   },
   {
@@ -2684,7 +2684,7 @@
     "rating": "4.8",
     "plays": 93453,
     "date": "2023-09-08",
-    "isHot": true,
+    "isHot": false,
     "isNew": false
   }
 ]

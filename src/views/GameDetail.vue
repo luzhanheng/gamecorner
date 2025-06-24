@@ -14,7 +14,7 @@
           <div class="absolute bottom-0 left-0 p-6">
             <h1 class="text-4xl font-game text-white mb-2">{{ game.title }}</h1>
             <div class="flex items-center space-x-4 text-gray-300">
-              <span>{{ game.category }}</span>
+              <span>{{ getGameTypeTranslation(game.category) }}</span>
               <span>·</span>
               <div class="flex items-center">
                 <span class="text-game-accent">★</span>
@@ -53,7 +53,7 @@
                 allowfullscreen
               ></iframe>
               <div v-else id="game-container" class="w-full h-full flex items-center justify-center text-gray-500">
-                游戏加载中...
+                game loading...
               </div>
             </div>
             <div class="p-6">
@@ -399,8 +399,8 @@ const updateGamePageMeta = () => {
   if (!game.value) return
   
   try {
-    // 更新页面标题和meta标签
-    updatePageMeta(route, { game: game.value })
+    // 更新页面标题和meta标签，传递当前语言
+    updatePageMeta(route, { game: game.value }, locale.value)
     
     // 更新canonical URL
     const canonicalUrl = generateCanonicalUrl(route.path)

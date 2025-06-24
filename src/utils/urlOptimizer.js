@@ -114,30 +114,58 @@ export const generateBreadcrumbs = (route, gameData = null, categoryData = null)
  * 更新页面标题和meta信息
  * @param {Object} route - 当前路由对象
  * @param {Object} data - 页面数据（游戏、分类等）
+ * @param {string} [currentLang] - 当前语言，默认为'zh'
  */
-export const updatePageMeta = (route, data = {}) => {
+export const updatePageMeta = (route, data = {}, currentLang = 'zh') => {
   const { game, category } = data
   
+  // 如果未提供语言参数，尝试从 HTML lang 属性获取
+  if (currentLang !== 'zh' && currentLang !== 'en') {
+    currentLang = document.documentElement.lang || 'zh'
+  }
+  
+  const isEnglish = currentLang === 'en'
+  
+  // 根据语言设置基础文本
+  const freeOnlineGames = isEnglish ? 'Free Online Games' : '免费在线游戏'
+  const platformDesc = isEnglish ? 'Free Online Gaming Platform' : '免费在线游戏平台'
+  const baseKeywords = isEnglish ? 'free games,online games,browser games' : '免费游戏,在线游戏,网页游戏'
+  
   let title = route.meta?.title || 'GameCorner'
-  let description = route.meta?.description || '免费在线游戏平台'
-  let keywords = route.meta?.keywords || '免费游戏,在线游戏'
+  let description = route.meta?.description || platformDesc
+  let keywords = route.meta?.keywords || baseKeywords
   
   // 根据页面类型动态更新meta信息
   switch (route.name) {
     case 'GameDetail':
     case 'GameDetailWithSlug':
       if (game) {
-        title = `${game.title || game.name} - 免费在线游戏 - GameCorner`
-        description = `立即免费游玩${game.title || game.name}，${game.description || '精彩的在线游戏体验等你来挑战'}`
-        keywords = `${game.title || game.name},免费游戏,在线游戏,${game.tags || '网页游戏'}`
+        title = `${game.title || game.name} - ${freeOnlineGames} - GameCorner`
+        
+        description = isEnglish
+          ? `Play ${game.title || game.name} for free. ${game.description || 'Experience this exciting online game now!'}`
+          : `立即免费游玩${game.title || game.name}，${game.description || '精彩的在线游戏体验等你来挑战'}`
+        
+        keywords = isEnglish
+          ? `${game.title || game.name},play online,free game,${game.tags || 'browser game'}`
+          : `${game.title || game.name},免费游戏,在线游戏,${game.tags || '网页游戏'}`
       }
       break
       
     case 'GamesByCategory':
       if (category) {
-        title = `${category.name}游戏 - 免费在线游戏 - GameCorner`
-        description = `浏览所有${category.name}类型的免费在线游戏，发现你喜欢的游戏`
-        keywords = `${category.name}游戏,免费游戏,在线游戏,游戏分类`
+        const categoryName = category.name
+        title = isEnglish
+          ? `${categoryName} Games - ${freeOnlineGames} - GameCorner`
+          : `${categoryName}游戏 - ${freeOnlineGames} - GameCorner`
+        
+        description = isEnglish
+          ? `Browse all ${categoryName} games for free online. Find your favorite games.`
+          : `浏览所有${categoryName}类型的免费在线游戏，发现你喜欢的游戏`
+        
+        keywords = isEnglish
+          ? `${categoryName} games,free games,online games,game category`
+          : `${categoryName}游戏,免费游戏,在线游戏,游戏分类`
       }
       break
   }

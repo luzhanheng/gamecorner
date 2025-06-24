@@ -90,6 +90,8 @@ const currentLanguage = computed(() => locale.value)
 // 切换语言
 const toggleLanguage = () => {
   locale.value = locale.value === 'zh' ? 'en' : 'zh'
+  // 设置 HTML 标签的 lang 属性
+  document.documentElement.lang = locale.value
 }
 
 // 执行搜索
@@ -229,6 +231,8 @@ watch(route, () => {
 
 onMounted(() => {
   console.log('App mounted')
+  // 设置初始语言
+  document.documentElement.lang = locale.value
   updateMetaTags()
   addStructuredData()
   initializeApp()
