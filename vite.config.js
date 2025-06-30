@@ -1,41 +1,24 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import path from 'path'
 
+// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vue()],
-  server: {
-    port: 3000,
-    open: true
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
   },
   build: {
-    outDir: 'dist',
-    assetsDir: 'assets',
-    sourcemap: false, // 生产环境关闭sourcemap
-    minify: 'terser', // 使用terser压缩
+    minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: true, // 移除console.log
+        // 移除console.log
+        drop_console: true,
+        // 移除debugger语句
         drop_debugger: true
       }
-    },
-    rollupOptions: {
-      output: {
-        // 代码分割
-        manualChunks: {
-          vendor: ['vue', 'vue-router', 'vue-i18n'],
-          phaser: ['phaser']
-        },
-        // 文件名优化
-        chunkFileNames: 'assets/js/[name]-[hash].js',
-        entryFileNames: 'assets/js/[name]-[hash].js',
-        assetFileNames: 'assets/[ext]/[name]-[hash].[ext]'
-      }
-    },
-    // 压缩阈值
-    chunkSizeWarningLimit: 1000
-  },
-  // 预构建优化
-  optimizeDeps: {
-    include: ['vue', 'vue-router', 'vue-i18n', 'phaser']
+    }
   }
 })
