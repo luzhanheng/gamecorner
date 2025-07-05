@@ -67,9 +67,19 @@ async function startServer() {
   // 提供静态文件
   app.use(express.static(DIST_FOLDER));
   
-  // 简化路由处理，避免使用复杂的path-to-regexp功能
-  app.use((req, res) => {
-    res.sendFile(path.join(DIST_FOLDER, 'index.html'));
+  // 改进路由处理，尝试查找预渲染的HTML文件
+  app.get('*', (req, res) => {
+    const requestPath = req.path;
+    const htmlPath = requestPath === '/' 
+      ? path.join(DIST_FOLDER, 'index.html')
+      : path.join(DIST_FOLDER, requestPath, 'index.html');
+    
+    // 检查文件是否存在
+    if (fs.existsSync(htmlPath)) {
+      res.sendFile(htmlPath);
+    } else {
+      res.sendFile(path.join(DIST_FOLDER, 'index.html'));
+    }
   });
   
   // 启动服务器

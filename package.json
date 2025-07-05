@@ -11,10 +11,12 @@
     "dev": "npm run build:data && vite",
     "build": "npm run build:data && vite build",
     "build:with-prerender": "npm run build && npm run prerender",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "preview:prerender": "node scripts/preview-server.cjs"
   },
   "dependencies": {
     "phaser": "^3.90.0",
+    "puppeteer": "^24.11.2",
     "vue": "^3.5.16",
     "vue-i18n": "^9.8.0",
     "vue-router": "^4.5.1"
@@ -24,6 +26,7 @@
     "autoprefixer": "^10.4.21",
     "date-fns": "^3.6.0",
     "express": "^4.19.2",
+    "jsdom": "^26.1.0",
     "postcss": "^8.5.4",
     "tailwindcss": "^3.4.17",
     "terser": "^5.40.0",
